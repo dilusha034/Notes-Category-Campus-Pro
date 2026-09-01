@@ -1296,42 +1296,193 @@ textarea.form-control {
 
 /* Responsive Breakpoints for Mobile & Tablet */
 @media (max-width: 868px) {
-  .sidebar-mobile-header {
-    display: flex;
+  :root {
+    --header-height: 64px;
+    --sidebar-width: 300px;
   }
 
-  .sidebar {
-    position: fixed;
-    top: 75px;
-    left: -320px;
-    width: 290px;
-    height: calc(100vh - 85px);
-    z-index: 90;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.7);
+  body {
+    overflow-x: hidden;
   }
 
-  .sidebar.mobile-open {
-    transform: translateX(320px);
+  /* Header adjustments for Mobile */
+  .glass-header {
+    padding: 0 8px;
+    height: var(--header-height);
   }
 
-  .content-viewport {
+  .header-container {
+    gap: 6px;
+    padding: 0;
+    justify-content: space-between;
     width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .brand-section {
+    gap: 6px;
+    flex-shrink: 0;
   }
 
   .glowing-title {
-    font-size: 1.25rem;
+    font-size: 1.05rem;
+  }
+
+  .badge-tag {
+    display: none;
+  }
+
+  .glow-avatar {
+    width: 34px;
+    height: 34px;
   }
 
   .search-bar-wrapper {
-    max-width: 180px;
+    max-width: 130px;
+    min-width: 80px;
+    padding: 6px 10px;
+    flex: 1;
+  }
+
+  .search-bar-wrapper input {
+    font-size: 0.8rem;
+  }
+
+  .header-actions {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .header-actions .glass-btn {
+    padding: 7px 9px;
+    font-size: 0.85rem;
   }
 
   .btn-text {
     display: none;
   }
 
+  /* Mobile Collapsible Sidebar Fixes */
+  .sidebar-mobile-header {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 300px;
+    max-width: 85vw;
+    height: 100vh;
+    z-index: 1000;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
+    padding-top: 10px;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(320px);
+  }
+
+  .sidebar-backdrop {
+    z-index: 999;
+  }
+
+  /* Tree Items Overflow Fix for Mobile */
+  .tree-node, .faculty-item, .year-item, .semester-item, .subject-item {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .node-header, .faculty-header, .year-header, .semester-header, .subject-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+    padding: 8px 10px;
+  }
+
+  .node-title, .item-label, .subject-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.88rem;
+  }
+
+  .node-actions, .item-actions {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  .node-actions button, .item-actions button {
+    padding: 3px 6px;
+    font-size: 0.75rem;
+  }
+
+  /* Main Workspace Mobile Layout */
+  .app-layout {
+    flex-direction: column;
+    padding: 10px 8px;
+    gap: 10px;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .content-viewport {
+    width: 100%;
+    padding: 14px 10px;
+    overflow-x: hidden;
+  }
+
   .timetable-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .timetable-card {
+    max-width: 100%;
+  }
+
+  .glass-modal {
+    width: 94vw;
+    max-width: 500px;
+    padding: 16px;
+    margin: 0 auto;
+  }
+
+  .fullscreen-reader-container {
+    width: 96vw;
+    height: 94vh;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .glowing-title {
+    font-size: 0.95rem;
+  }
+  
+  .glow-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .search-bar-wrapper {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 3px;
+  }
+
+  .header-actions .glass-btn {
+    padding: 6px 8px;
+    font-size: 0.8rem;
   }
 }
