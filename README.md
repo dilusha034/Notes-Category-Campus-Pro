@@ -15,7 +15,12 @@
 * **[🌐 Live Web App එක වෙත පිවිසෙන්න (Click Here)](https://dilusha034.github.io/Notes-Category-Campus-Pro/)**
 * **Mobile Phone App Install:** Phone එකෙහි Chrome / Brave බ්‍රවුසරයෙන් ඉහත Link එකට ගොස් **`Add to Home Screen`** ක්ලික් කිරීමෙන් Mobile App එකක් ලෙස Install කරගත හැක!
 
-### Option 2: 💻 Windows 11 Desktop Software (.exe)
+### Option 2: 🤖 Android APK File එක සාදාගන්නා ආකාරය (Generate Android APK)
+1. **[PWABuilder.com වෙත පිවිසෙන්න](https://www.pwabuilder.com/)**
+2. ඔබගේ URL එක ඇතුළත් කරන්න: `https://dilusha034.github.io/Notes-Category-Campus-Pro/`
+3. **`Package for Android`** මත ක්ලික් කර direct **.apk** හෝ **.aab** ගොනුව Download කර ඔබගේ Android Phone එකේ Install කරගන්න! 📱🔥
+
+### Option 3: 💻 Windows 11 Desktop Software (.exe)
 1. **[📥 Releases පිටුවෙන් Windows Setup (.exe) එක බාගත කරගන්න](https://github.com/dilusha034/Notes-Category-Campus-Pro/releases)**
 2. බාගත වූ `Notes Category Campus Pro Setup 3.2.0.exe` ගොනුව Double Click කර Install කරගන්න.
 3. Desktop එකෙහි ඇති **Notes Category Campus Pro** Icon එක ඔස්සේ සෘජුවම භාවිතා කරන්න! ✨
