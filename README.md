@@ -1,29 +1,27 @@
 # 🎓 Notes Category | Campus Pro (v3.2)
 > **The Ultimate Cyber Glassmorphic Academic Notes, Timetable & Book Tracker Platform for University Students** 🚀
 
-[![Live Web App](https://img.shields.io/badge/🌐_Live_Web_App-Open_Online-06b6d4?style=for-the-badge&logo=googlechrome)](https://dilusha034.github.io/Notes-Category-Campus-Pro/)
+[![Download Android APK](https://img.shields.io/badge/📱_Download_Android_App-.apk-emerald?style=for-the-badge&logo=android)](https://github.com/dilusha034/Notes-Category-Campus-Pro/releases)
 [![Direct Download Windows Executable](https://img.shields.io/badge/📥_Download_Windows_App-.exe-blueviolet?style=for-the-badge&logo=windows11)](https://github.com/dilusha034/Notes-Category-Campus-Pro/releases)
+[![Live Web App](https://img.shields.io/badge/🌐_Live_Web_App-Open_Online-06b6d4?style=for-the-badge&logo=googlechrome)](https://dilusha034.github.io/Notes-Category-Campus-Pro/)
 ![Status Production Ready](https://img.shields.io/badge/Status-Production_Ready-emerald?style=for-the-badge)
-![Mobile PWA Support](https://img.shields.io/badge/Mobile-PWA_Ready-f59e0b?style=for-the-badge&logo=android)
 ![License MIT](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)
 
 ---
 
-## 🌐 Quick Access & Installation (භාවිතයට පිවිසෙන්න)
+## 🚀 Direct Downloads & Access (සෘජුවම බාගත කරගන්න)
 
-### Option 1: 📱 Online Web & Mobile App (ඕනෑම Phone හෝ PC එකකින්)
-* **[🌐 Live Web App එක වෙත පිවිසෙන්න (Click Here)](https://dilusha034.github.io/Notes-Category-Campus-Pro/)**
-* **Mobile Phone App Install:** Phone එකෙහි Chrome / Brave බ්‍රවුසරයෙන් ඉහත Link එකට ගොස් **`Add to Home Screen`** ක්ලික් කිරීමෙන් Mobile App එකක් ලෙස Install කරගත හැක!
+### Option 1: 📱 Android Mobile App (.apk)
+* **[📥 Android App (.apk) Direct Download කරන්න (Click Here)](https://github.com/dilusha034/Notes-Category-Campus-Pro/releases)**
+* බාගත වූ `Notes-Category-Campus-Pro-v3.2.0.apk` ගොනුව Touch කර ඔබගේ Android Phone එකෙහි Install කරගන්න! 📱✨
 
-### Option 2: 🤖 Android APK File එක සාදාගන්නා ආකාරය (Generate Android APK)
-1. **[PWABuilder.com වෙත පිවිසෙන්න](https://www.pwabuilder.com/)**
-2. ඔබගේ URL එක ඇතුළත් කරන්න: `https://dilusha034.github.io/Notes-Category-Campus-Pro/`
-3. **`Package for Android`** මත ක්ලික් කර direct **.apk** හෝ **.aab** ගොනුව Download කර ඔබගේ Android Phone එකේ Install කරගන්න! 📱🔥
-
-### Option 3: 💻 Windows 11 Desktop Software (.exe)
-1. **[📥 Releases පිටුවෙන් Windows Setup (.exe) එක බාගත කරගන්න](https://github.com/dilusha034/Notes-Category-Campus-Pro/releases)**
+### Option 2: 💻 Windows 11 Desktop Software (.exe)
+1. **[📥 Windows Setup (.exe) Direct Download කරන්න](https://github.com/dilusha034/Notes-Category-Campus-Pro/releases)**
 2. බාගත වූ `Notes Category Campus Pro Setup 3.2.0.exe` ගොනුව Double Click කර Install කරගන්න.
-3. Desktop එකෙහි ඇති **Notes Category Campus Pro** Icon එක ඔස්සේ සෘජුවම භාවිතා කරන්න! ✨
+3. Desktop එකෙහි ඇති **Notes Category Campus Pro** Icon එක ඔස්සේ සෘජුවම භාවිතා කරන්න! 💻✨
+
+### Option 3: 🌐 Online Web Access (ඕනෑම Browser එකකින්)
+* **[🌐 Live Web App එක වෙත පිවිසෙන්න (Click Here)](https://dilusha034.github.io/Notes-Category-Campus-Pro/)**
 
 ---
 
