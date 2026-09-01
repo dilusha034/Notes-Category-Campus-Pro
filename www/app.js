@@ -729,25 +729,39 @@ function closeReaderModal() {
   document.getElementById("fullscreenReaderModal").classList.add("hidden");
 }
 
-// Direct 1-Click PDF File Export using html2pdf library
+// Direct 1-Click PDF File Export using html2pdf library & Blob Viewer Fallback for Mobile WebView
 function exportDirectPDF(targetElementId = "readerContentBody") {
   const element = document.getElementById(targetElementId) || document.getElementById("contentViewport");
   if (!element) return;
 
   showToast("📄 PDF ගොනුව සකස් කරමින් පවතී...");
 
-  // If html2pdf library is available, download direct .pdf file!
   if (window.html2pdf) {
     const opt = {
       margin:       [10, 10, 10, 10],
       filename:     `Notes_Category_Document_${Date.now()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(element).save().then(() => {
-      showToast("✅ PDF ගොනුව සාර්ථකව Download විය!");
+    html2pdf().set(opt).from(element).toPdf().get('pdf').then(pdf => {
+      const blob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // 1. Direct Blob Download
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `Notes_Category_${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // 2. Mobile WebView Fallback: Open PDF in new tab/window for direct viewing & saving
+      setTimeout(() => {
+        window.open(blobUrl, '_blank');
+      }, 400);
+
+      showToast("✅ PDF සකස් විය! Screen එකේ දිස්වන PDF එක Save කරගන්න.");
     }).catch(err => {
       window.print();
     });
@@ -765,38 +779,46 @@ function printOrExportPDF() {
    ========================================================================== */
 
 let notifiedSlots = new Set();
+let isNotificationActive = localStorage.getItem("notes_cat_notify_enabled") !== "false"; // Default to true
 
 function requestNotificationPermission() {
   const btn = document.getElementById("enableNotifyBtn");
   
-  if ("Notification" in window && typeof Notification.requestPermission === "function") {
-    Notification.requestPermission().then(permission => {
-      if (permission === "granted") {
-        showToast("🔔 කාලසටහන් Alerts (Notifications) සක්‍රිය විය!");
-        if (btn) btn.classList.add("active-bell");
-      } else {
-        showToast("🔔 In-App Sound Alerts සහ Reminders සක්‍රියයි!");
-        if (btn) btn.classList.add("active-bell");
-      }
-    }).catch(() => {
-      showToast("🔔 In-App Sound Alerts සහ Reminders සක්‍රියයි!");
-      if (btn) btn.classList.add("active-bell");
-    });
-  } else {
-    showToast("🔔 In-App Sound Alerts සහ Reminders සක්‍රියයි!");
+  // Toggle Notification State
+  isNotificationActive = !isNotificationActive;
+  localStorage.setItem("notes_cat_notify_enabled", isNotificationActive ? "true" : "false");
+
+  if (isNotificationActive) {
     if (btn) btn.classList.add("active-bell");
+    showToast("🔔 කාලසටහන් Alerts (Notifications & Sound) සක්‍රිය විය!");
+
+    if ("Notification" in window && typeof Notification.requestPermission === "function" && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  } else {
+    if (btn) btn.classList.remove("active-bell");
+    showToast("🔕 Notifications සහ Sound Alerts අක්‍රිය විය.");
   }
 }
 
 function initTimetableNotifications() {
-  if ("Notification" in window && Notification.permission === "granted") {
-    const btn = document.getElementById("enableNotifyBtn");
-    if (btn) btn.classList.add("active-bell");
+  const btn = document.getElementById("enableNotifyBtn");
+  const storedSetting = localStorage.getItem("notes_cat_notify_enabled");
+  
+  // Default to enabled if not explicitly turned off
+  if (storedSetting === null) {
+    localStorage.setItem("notes_cat_notify_enabled", "true");
+    isNotificationActive = true;
+  } else {
+    isNotificationActive = storedSetting === "true";
   }
 
-  // Check every 30 seconds for upcoming classes
-  setInterval(checkTimetableNotifications, 30000);
-  // Also check immediately on load
+  if (isNotificationActive && btn) {
+    btn.classList.add("active-bell");
+  }
+
+  // Check every 25 seconds for upcoming classes
+  setInterval(checkTimetableNotifications, 25000);
   checkTimetableNotifications();
 }
 

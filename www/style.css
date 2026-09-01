@@ -1363,7 +1363,7 @@ textarea.form-control {
     display: none;
   }
 
-  /* Mobile Collapsible Sidebar Fixes */
+  /* Mobile Collapsible Sidebar Fixes - 100% Screen Height */
   .sidebar-mobile-header {
     display: flex;
   }
@@ -1375,10 +1375,22 @@ textarea.form-control {
     width: 300px;
     max-width: 85vw;
     height: 100vh;
+    height: 100dvh;
+    bottom: 0;
     z-index: 1000;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
     padding-top: 10px;
+    padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .faculties-tree-container {
+    flex: 1;
+    overflow-y: auto;
+    max-height: none;
+    height: 100%;
   }
 
   .sidebar.mobile-open {
@@ -1425,18 +1437,23 @@ textarea.form-control {
     font-size: 0.75rem;
   }
 
-  /* Main Workspace Mobile Layout */
+  /* Main Workspace Mobile Layout - 100% Screen Fill */
   .app-layout {
     flex-direction: column;
     padding: 10px 8px;
     gap: 10px;
     max-width: 100vw;
+    min-height: calc(100vh - var(--header-height));
+    min-height: calc(100dvh - var(--header-height));
     overflow-x: hidden;
   }
 
   .content-viewport {
     width: 100%;
     padding: 14px 10px;
+    min-height: calc(100vh - var(--header-height) - 30px);
+    min-height: calc(100dvh - var(--header-height) - 30px);
+    max-height: none;
     overflow-x: hidden;
   }
 
