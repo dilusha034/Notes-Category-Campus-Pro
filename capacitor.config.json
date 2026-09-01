@@ -1,0 +1,10 @@
+{
+  "appId": "com.campusstudent.notescategory",
+  "appName": "Notes Category Campus Pro",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://dilusha034.github.io/Notes-Category-Campus-Pro/",
+    "cleartext": true
+  }
+}
