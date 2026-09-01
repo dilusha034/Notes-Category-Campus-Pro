@@ -170,7 +170,16 @@ document.addEventListener("DOMContentLoaded", () => {
   bindEvents();
   renderSidebar();
   renderMainView();
+  registerServiceWorker();
 });
+
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('PWA Service Worker Registered', reg))
+      .catch(err => console.log('Service Worker Register Failed', err));
+  }
+}
 
 function loadState() {
   const saved = localStorage.getItem("notes_category_data_v3");
