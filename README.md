@@ -76,4 +76,4 @@ $env:ELECTRON_MIRROR="https://npmmirror.com/mirrors/electron/" ; npm run build-w
 * **Data Backup (`.json` Export & Import):** Header එකේ ඇති Download සහ Upload බටන් භාවිතයෙන් ඕනෑම මොහොතක ඔබගේ දත්ත වෙනත් පරිගණකයකට මාරු කිරීම හෝ Backup කරගැනීම කළ හැක.
 
 ---
-**Crafted with ❤️ for BPU Campus Students**
+**Crafted with ❤️ for Campus Students**

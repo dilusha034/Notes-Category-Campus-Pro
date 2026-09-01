@@ -256,6 +256,43 @@ function bindEvents() {
   document.getElementById("closeModalBtn").addEventListener("click", closeModal);
   document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
   document.getElementById("closeReaderBtn").addEventListener("click", closeReaderModal);
+
+  // Mobile Sidebar Toggle Events
+  const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
+  const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+  const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+  const mainSidebar = document.getElementById("mainSidebar");
+
+  if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener("click", () => {
+      mainSidebar.classList.toggle("mobile-open");
+      sidebarBackdrop.classList.toggle("hidden");
+    });
+  }
+
+  if (closeSidebarBtn) {
+    closeSidebarBtn.addEventListener("click", closeMobileSidebar);
+  }
+
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener("click", closeMobileSidebar);
+  }
+
+  // Timetable Notification Alert Button
+  const enableNotifyBtn = document.getElementById("enableNotifyBtn");
+  if (enableNotifyBtn) {
+    enableNotifyBtn.addEventListener("click", requestNotificationPermission);
+  }
+
+  // Start Real-Time Timetable Alarm Scheduler (Google Calendar Style)
+  initTimetableNotifications();
+}
+
+function closeMobileSidebar() {
+  const mainSidebar = document.getElementById("mainSidebar");
+  const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+  if (mainSidebar) mainSidebar.classList.remove("mobile-open");
+  if (sidebarBackdrop) sidebarBackdrop.classList.add("hidden");
 }
 
 function updateNavActiveState() {
@@ -396,6 +433,7 @@ function selectSubject(facId, yrId, semId, subId) {
   updateNavActiveState();
   renderSidebar();
   renderMainView();
+  closeMobileSidebar();
 }
 
 function renderMainView() {
@@ -682,9 +720,171 @@ function closeReaderModal() {
   document.getElementById("fullscreenReaderModal").classList.add("hidden");
 }
 
-// Print & Export to PDF Function
+// Direct 1-Click PDF File Export using html2pdf library
+function exportDirectPDF(targetElementId = "readerContentBody") {
+  const element = document.getElementById(targetElementId) || document.getElementById("contentViewport");
+  if (!element) return;
+
+  showToast("📄 PDF ගොනුව සකස් කරමින් පවතී...");
+
+  // If html2pdf library is available, download direct .pdf file!
+  if (window.html2pdf) {
+    const opt = {
+      margin:       [10, 10, 10, 10],
+      filename:     `Notes_Category_Document_${Date.now()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      showToast("✅ PDF ගොනුව සාර්ථකව Download විය!");
+    }).catch(err => {
+      window.print();
+    });
+  } else {
+    window.print();
+  }
+}
+
 function printOrExportPDF() {
-  window.print();
+  exportDirectPDF();
+}
+
+/* ==========================================================================
+   REAL-TIME TIMETABLE NOTIFICATION & ALARM REMINDER ENGINE (Google Calendar style)
+   ========================================================================== */
+
+let notifiedSlots = new Set();
+
+function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    showToast("ඔබගේ බ්‍රවුසරය Notifications සඳහා සහය නොදක්වයි.");
+    return;
+  }
+
+  Notification.requestPermission().then(permission => {
+    const btn = document.getElementById("enableNotifyBtn");
+    if (permission === "granted") {
+      showToast("🔔 කාලසටහන් Alerts (Notifications) සක්‍රිය විය!");
+      if (btn) btn.classList.add("active-bell");
+    } else {
+      showToast("Notifications අවසරය ලබා දී නැත.");
+    }
+  });
+}
+
+function initTimetableNotifications() {
+  if ("Notification" in window && Notification.permission === "granted") {
+    const btn = document.getElementById("enableNotifyBtn");
+    if (btn) btn.classList.add("active-bell");
+  }
+
+  // Check every 30 seconds for upcoming classes
+  setInterval(checkTimetableNotifications, 30000);
+  // Also check immediately on load
+  checkTimetableNotifications();
+}
+
+function checkTimetableNotifications() {
+  if (!state.timetable || state.timetable.length === 0) return;
+
+  const now = new Date();
+  const dayNames = ["ඉරිදා (Sunday)", "සඳුදා (Monday)", "අඟහරුවාදා (Tuesday)", "බදාදා (Wednesday)", "බ්‍රහස්පතින්දා (Thursday)", "සිකුරාදා (Friday)", "සෙනසුරාදා (Saturday)"];
+  const currentDayName = dayNames[now.getDay()];
+
+  // Find today's timetable group
+  const todayGroup = state.timetable.find(g => g.day.includes(currentDayName.split(" ")[0]) || g.day.toLowerCase().includes(currentDayName.split("(")[1].replace(")", "").toLowerCase()));
+  if (!todayGroup || !todayGroup.slots) return;
+
+  const currentHours = now.getHours();
+  const currentMins = now.getMinutes();
+
+  todayGroup.slots.forEach(slot => {
+    if (!slot.time) return;
+
+    // Parse time string e.g. "08:30 AM" or "08:30" or "8:30"
+    const parsedTime = parseSlotStartTime(slot.time);
+    if (!parsedTime) return;
+
+    const slotKey = `${now.toDateString()}_${slot.id}`;
+
+    // If slot starts in next 10 minutes or right now
+    const diffMins = (parsedTime.hours * 60 + parsedTime.minutes) - (currentHours * 60 + currentMins);
+
+    if (diffMins >= 0 && diffMins <= 10 && !notifiedSlots.has(slotKey)) {
+      notifiedSlots.add(slotKey);
+      triggerClassNotification(slot, diffMins);
+    }
+  });
+}
+
+function parseSlotStartTime(timeStr) {
+  try {
+    const startPart = timeStr.split("-")[0].trim().toLowerCase(); // e.g. "08:30 am"
+    const isPM = startPart.includes("pm");
+    const isAM = startPart.includes("am");
+    const cleanStr = startPart.replace("am", "").replace("pm", "").trim();
+    const [h, m] = cleanStr.split(":").map(n => parseInt(n));
+
+    if (isNaN(h)) return null;
+
+    let hours = h;
+    if (isPM && hours < 12) hours += 12;
+    if (isAM && hours === 12) hours = 0;
+
+    return { hours, minutes: m || 0 };
+  } catch (e) {
+    return null;
+  }
+}
+
+function triggerClassNotification(slot, minsRemaining) {
+  const timeText = minsRemaining === 0 ? "දැන් ආරම්භ වේ!" : `තව මිනිත්තු ${minsRemaining} කින් ආරම්භ වේ!`;
+  const title = `🔔 පන්ති මතක් කිරීම: ${slot.subject}`;
+  const bodyText = `වේලාව: ${slot.time}\nස්ථානය: ${slot.location || 'සඳහන් නැත'} (${slot.type || 'Lecture'})\n${timeText}`;
+
+  // 1. In-App Glowing Toast Notification
+  showToast(`🔔 ${slot.subject} (${slot.time}) - ${timeText}`);
+
+  // 2. Play Audio Chime Sound Alert
+  playNotificationSound();
+
+  // 3. Desktop / Browser Push Notification
+  if ("Notification" in window && Notification.permission === "granted") {
+    try {
+      new Notification(title, {
+        body: bodyText,
+        icon: "https://cdn-icons-png.flaticon.com/512/2991/2991106.png",
+        tag: slot.id
+      });
+    } catch (e) {
+      console.log("Push notification error:", e);
+    }
+  }
+}
+
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 note
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // A5 note
+
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  } catch (e) {
+    // Audio context fallback
+  }
 }
 
 // Global Search Results

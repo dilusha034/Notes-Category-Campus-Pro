@@ -17,6 +17,12 @@
   <!-- Marked parser for Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+  <!-- HTML2PDF library for Direct 1-Click PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Mobile PWA App Support -->
+  <link rel="manifest" href="manifest.json">
+
   <!-- CSS Style -->
   <link rel="stylesheet" href="style.css">
 </head>
@@ -30,6 +36,9 @@
   <header class="glass-header">
     <div class="header-container">
       <div class="brand-section">
+        <button id="sidebarToggleBtn" class="glass-btn btn-icon sidebar-toggle-btn" title="Sidebar එක දිගහැරීම/ඇකිලීම">
+          <i class="fa-solid fa-bars"></i>
+        </button>
         <div class="glow-avatar">
           <i class="fa-solid fa-graduation-cap"></i>
         </div>
@@ -44,6 +53,9 @@
       </div>
 
       <div class="header-actions">
+        <button id="enableNotifyBtn" class="glass-btn" title="කාලසටහන් Notifications (Reminders) සක්‍රිය කරන්න">
+          <i class="fa-solid fa-bell"></i> <span class="btn-text">Alerts</span>
+        </button>
         <button id="quickAddBtn" class="glass-btn btn-primary" title="අලුත් අයිතමයක් එකතු කරන්න">
           <i class="fa-solid fa-plus"></i> <span class="btn-text">නව අයිතමය</span>
         </button>
@@ -58,10 +70,20 @@
     </div>
   </header>
 
+  <!-- Mobile Backdrop Overlay for Sidebar -->
+  <div class="sidebar-backdrop hidden" id="sidebarBackdrop"></div>
+
   <!-- Main Workspace -->
   <div class="app-layout">
     <!-- Left Sidebar: VS Code style navigation panel -->
-    <aside class="sidebar glass-panel">
+    <aside class="sidebar glass-panel" id="mainSidebar">
+      <div class="sidebar-mobile-header">
+        <span style="font-weight:700; display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-graduation-cap" style="color:var(--primary-glow)"></i> අධ්‍යයන ව්‍යුහය
+        </span>
+        <button class="btn-icon" id="closeSidebarBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
       <!-- Timetable Launcher -->
       <div class="sidebar-section">
         <button class="nav-item timetable-nav-btn active" id="navTimetableBtn">
@@ -118,7 +140,7 @@
           <h2 id="readerTitle">සටහන් මාතෘකාව</h2>
         </div>
         <div class="reader-actions">
-          <button class="glass-btn" onclick="printOrExportPDF('readerContentBody')"><i class="fa-solid fa-file-pdf"></i> PDF ලෙස බාගත කරන්න (Print)</button>
+          <button class="glass-btn btn-primary" onclick="exportDirectPDF()"><i class="fa-solid fa-file-pdf"></i> PDF ලෙස බාගත කරන්න</button>
           <button class="btn-icon" id="closeReaderBtn" style="font-size:1.4rem; padding:6px 12px;"><i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>
