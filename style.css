@@ -1363,25 +1363,27 @@ textarea.form-control {
     display: none;
   }
 
-  /* Mobile Collapsible Sidebar Fixes - 100% Screen Height */
+  /* Mobile Collapsible Sidebar Fixes - Guaranteed 100% Screen Height */
   .sidebar-mobile-header {
     display: flex;
   }
 
   .sidebar {
     position: fixed;
-    top: 0;
+    top: 0 !important;
+    bottom: 0 !important;
     left: -320px;
     width: 300px;
     max-width: 85vw;
-    height: 100vh;
-    height: 100dvh;
-    bottom: 0;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 16px 16px 0 !important;
     z-index: 1000;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
-    padding-top: 10px;
-    padding-bottom: 20px;
+    padding: 12px 14px 24px 14px;
     display: flex;
     flex-direction: column;
   }
@@ -1389,7 +1391,7 @@ textarea.form-control {
   .faculties-tree-container {
     flex: 1;
     overflow-y: auto;
-    max-height: none;
+    max-height: none !important;
     height: 100%;
   }
 
