@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes Category | Campus Student Hub</title>
+  <meta name="description" content="Ultimate Glassmorphism Study & Notes Management Platform for Campus Students">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Sinhala:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Marked parser for Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- CSS Style -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Glowing background ambient light Orbs -->
+  <div class="ambient-glow orb-1"></div>
+  <div class="ambient-glow orb-2"></div>
+  <div class="ambient-glow orb-3"></div>
+
+  <!-- Header Bar -->
+  <header class="glass-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="glow-avatar">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <h1 class="glowing-title">Notes <span class="accent-text">Category</span></h1>
+        <span class="badge-tag">Campus Pro</span>
+      </div>
+
+      <div class="search-bar-wrapper">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="globalSearch" placeholder="නෝට්ස්, පොත්පත්, අගයීම්, සිලබස් සොයන්න..." autocomplete="off">
+        <button id="clearSearch" class="btn-icon hidden"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="header-actions">
+        <button id="quickAddBtn" class="glass-btn btn-primary" title="අලුත් අයිතමයක් එකතු කරන්න">
+          <i class="fa-solid fa-plus"></i> <span class="btn-text">නව අයිතමය</span>
+        </button>
+        <button id="exportDataBtn" class="glass-btn" title="Backup ගන්න (Data Export)">
+          <i class="fa-solid fa-download"></i>
+        </button>
+        <button id="importDataBtn" class="glass-btn" title="Backup ඇතුලත් කරන්න (Data Import)">
+          <i class="fa-solid fa-upload"></i>
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none;">
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="app-layout">
+    <!-- Left Sidebar: VS Code style navigation panel -->
+    <aside class="sidebar glass-panel">
+      <!-- Timetable Launcher -->
+      <div class="sidebar-section">
+        <button class="nav-item timetable-nav-btn active" id="navTimetableBtn">
+          <div class="nav-icon"><i class="fa-solid fa-calendar-days"></i></div>
+          <span class="nav-label">කාලසටහන (Timetable)</span>
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Faculties Header -->
+      <div class="section-header">
+        <span class="section-title"><i class="fa-solid fa-university"></i> පීඨ (Faculties)</span>
+        <button class="btn-add-mini" id="addFacultyBtn" title="අලුත් පීඨයක් එකතු කරන්න">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Faculties list -->
+      <div class="faculties-tree-container" id="facultiesTree">
+        <!-- Dynamic Faculty & Subject Tree populated via JS -->
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-viewport glass-panel" id="contentViewport">
+      <!-- Content view will be rendered here dynamically -->
+    </main>
+  </div>
+
+  <!-- Universal Modal for Adding/Editing Items -->
+  <div class="modal-overlay hidden" id="universalModal">
+    <div class="glass-modal">
+      <div class="modal-header">
+        <h3 id="modalTitle"><i class="fa-solid fa-pen-to-square"></i> නව අයිතමය</h3>
+        <button class="btn-icon" id="closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Form elements dynamically inserted -->
+      </div>
+      <div class="modal-footer">
+        <button class="glass-btn" id="cancelModalBtn">අවලංගු කරන්න</button>
+        <button class="glass-btn btn-primary" id="saveModalBtn">තැන්පත් කරන්න (Save)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Distraction-Free Fullscreen Note Reader Modal -->
+  <div class="modal-overlay hidden" id="fullscreenReaderModal">
+    <div class="fullscreen-reader-container glass-panel">
+      <div class="reader-header">
+        <div class="reader-title-area">
+          <span id="readerCategoryBadge" class="category-tag">කෙටි සටහන්</span>
+          <h2 id="readerTitle">සටහන් මාතෘකාව</h2>
+        </div>
+        <div class="reader-actions">
+          <button class="glass-btn" onclick="printOrExportPDF('readerContentBody')"><i class="fa-solid fa-file-pdf"></i> PDF ලෙස බාගත කරන්න (Print)</button>
+          <button class="btn-icon" id="closeReaderBtn" style="font-size:1.4rem; padding:6px 12px;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <div class="reader-body" id="readerContentBody">
+        <div class="markdown-rendered" id="readerMarkdownText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer"></div>
+
+  <!-- JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>

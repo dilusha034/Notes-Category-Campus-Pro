@@ -1,0 +1,34 @@
+{
+  "name": "notes-category-campus-pro",
+  "version": "3.2.0",
+  "description": "Ultimate Glassmorphism Academic Notes & Timetable Manager for Campus Students (Windows 11 Compatible)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build-win": "electron-builder --win nsis"
+  },
+  "keywords": [
+    "campus",
+    "university",
+    "student",
+    "notes",
+    "timetable",
+    "glassmorphism",
+    "sri-lanka",
+    "academic-hierarchy"
+  ],
+  "author": "Campus Student Pro",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.0"
+  },
+  "build": {
+    "appId": "com.campusstudent.notescategory",
+    "productName": "Notes Category Campus Pro",
+    "win": {
+      "target": "nsis",
+      "icon": "icon.png"
+    }
+  }
+}
