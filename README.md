@@ -1,17 +1,21 @@
 # 🎓 Notes Category | Campus Pro (v3.2)
 > **The Ultimate Cyber Glassmorphic Academic Notes, Timetable & Book Tracker Platform for University Students** 🚀
 
+[![Live Web App](https://img.shields.io/badge/🌐_Live_Web_App-Open_Online-06b6d4?style=for-the-badge&logo=googlechrome)](https://dilusha034.github.io/Notes-Category-Campus-Pro/)
 [![Direct Download Windows Executable](https://img.shields.io/badge/📥_Download_Windows_App-.exe-blueviolet?style=for-the-badge&logo=windows11)](https://github.com/dilusha034/Notes-Category-Campus-Pro/releases)
 ![Status Production Ready](https://img.shields.io/badge/Status-Production_Ready-emerald?style=for-the-badge)
-![Windows 11 Compatible](https://img.shields.io/badge/Windows-11_Executable-blue?style=for-the-badge&logo=windows11)
+![Mobile PWA Support](https://img.shields.io/badge/Mobile-PWA_Ready-f59e0b?style=for-the-badge&logo=android)
 ![License MIT](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)
 
 ---
 
-## 🚀 Quick Download & Install (Windows 11 Software)
+## 🌐 Quick Access & Installation (භාවිතයට පිවිසෙන්න)
 
-ඔබට **Notes Category Campus Pro** යෙදුම සෘජුවම Windows 11 පරිගණකයේ Software එකක් ලෙස Install කර භාවිතා කිරීමට අවශ්‍ය නම්:
+### Option 1: 📱 Online Web & Mobile App (ඕනෑම Phone හෝ PC එකකින්)
+* **[🌐 Live Web App එක වෙත පිවිසෙන්න (Click Here)](https://dilusha034.github.io/Notes-Category-Campus-Pro/)**
+* **Mobile Phone App Install:** Phone එකෙහි Chrome / Brave බ්‍රවුසරයෙන් ඉහත Link එකට ගොස් **`Add to Home Screen`** ක්ලික් කිරීමෙන් Mobile App එකක් ලෙස Install කරගත හැක!
 
+### Option 2: 💻 Windows 11 Desktop Software (.exe)
 1. **[📥 Releases පිටුවෙන් Windows Setup (.exe) එක බාගත කරගන්න](https://github.com/dilusha034/Notes-Category-Campus-Pro/releases)**
 2. බාගත වූ `Notes Category Campus Pro Setup 3.2.0.exe` ගොනුව Double Click කර Install කරගන්න.
 3. Desktop එකෙහි ඇති **Notes Category Campus Pro** Icon එක ඔස්සේ සෘජුවම භාවිතා කරන්න! ✨
