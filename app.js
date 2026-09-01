@@ -534,7 +534,7 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
           <h2><i class="fa-solid fa-book-open" style="color:var(--primary-glow)"></i> ${escapeHTML(subject.name)}</h2>
           <p class="subtitle">${escapeHTML(fac.name)} &bull; ${escapeHTML(yr.name)} &bull; ${escapeHTML(sem.name)}</p>
         </div>
-        <div style="display:flex; gap:8px;">
+        <div class="subject-action-bar">
           <button class="glass-btn btn-primary" onclick="openModuleModal('${facId}', '${yrId}', '${semId}', '${subId}')">
             <i class="fa-solid fa-plus"></i> නව අයිතමයක් (Syllabus / Note / Book)
           </button>
@@ -767,20 +767,25 @@ function printOrExportPDF() {
 let notifiedSlots = new Set();
 
 function requestNotificationPermission() {
-  if (!("Notification" in window)) {
-    showToast("ඔබගේ බ්‍රවුසරය Notifications සඳහා සහය නොදක්වයි.");
-    return;
-  }
-
-  Notification.requestPermission().then(permission => {
-    const btn = document.getElementById("enableNotifyBtn");
-    if (permission === "granted") {
-      showToast("🔔 කාලසටහන් Alerts (Notifications) සක්‍රිය විය!");
+  const btn = document.getElementById("enableNotifyBtn");
+  
+  if ("Notification" in window && typeof Notification.requestPermission === "function") {
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        showToast("🔔 කාලසටහන් Alerts (Notifications) සක්‍රිය විය!");
+        if (btn) btn.classList.add("active-bell");
+      } else {
+        showToast("🔔 In-App Sound Alerts සහ Reminders සක්‍රියයි!");
+        if (btn) btn.classList.add("active-bell");
+      }
+    }).catch(() => {
+      showToast("🔔 In-App Sound Alerts සහ Reminders සක්‍රියයි!");
       if (btn) btn.classList.add("active-bell");
-    } else {
-      showToast("Notifications අවසරය ලබා දී නැත.");
-    }
-  });
+    });
+  } else {
+    showToast("🔔 In-App Sound Alerts සහ Reminders සක්‍රියයි!");
+    if (btn) btn.classList.add("active-bell");
+  }
 }
 
 function initTimetableNotifications() {

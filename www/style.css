@@ -1456,10 +1456,59 @@ textarea.form-control {
     margin: 0 auto;
   }
 
-  .fullscreen-reader-container {
-    width: 96vw;
-    height: 94vh;
-    padding: 14px;
+  /* Subject View Action Bar Mobile Fix */
+  .subject-action-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+  }
+
+  .subject-action-bar .glass-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* Fullscreen Note Reader Header Mobile Overlap Fix */
+  .reader-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    width: 100%;
+  }
+
+  .reader-title-area {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .reader-title-area h2 {
+    font-size: 1.15rem;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+
+  .reader-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .reader-actions .glass-btn {
+    flex: 1;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    justify-content: center;
+  }
+
+  .reader-body {
+    padding: 16px 18px;
   }
 }
 
