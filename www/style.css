@@ -1363,29 +1363,32 @@ textarea.form-control {
     display: none;
   }
 
-  /* Mobile Collapsible Sidebar Fixes - Guaranteed 100% Screen Height */
+  /* Mobile Collapsible Sidebar Fixes - Guaranteed 100% Full Screen Height */
   .sidebar-mobile-header {
     display: flex;
   }
 
   .sidebar {
-    position: fixed;
+    position: fixed !important;
     top: 0 !important;
     bottom: 0 !important;
     left: -320px;
-    width: 300px;
-    max-width: 85vw;
+    width: 310px;
+    max-width: 88vw;
     height: 100vh !important;
     height: 100dvh !important;
+    height: 100% !important;
     max-height: 100vh !important;
     max-height: 100dvh !important;
-    border-radius: 0 16px 16px 0 !important;
-    z-index: 1000;
+    margin: 0 !important;
+    border-radius: 0 20px 20px 0 !important;
+    z-index: 10000 !important;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.85);
-    padding: 12px 14px 24px 14px;
-    display: flex;
-    flex-direction: column;
+    box-shadow: 15px 0 50px rgba(0, 0, 0, 0.9);
+    padding: 14px 12px 30px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   .faculties-tree-container {
@@ -1393,6 +1396,7 @@ textarea.form-control {
     overflow-y: auto;
     max-height: none !important;
     height: 100%;
+    padding-bottom: 70px !important;
   }
 
   .sidebar.mobile-open {
@@ -1400,7 +1404,7 @@ textarea.form-control {
   }
 
   .sidebar-backdrop {
-    z-index: 999;
+    z-index: 9999;
   }
 
   /* Tree Items Overflow Fix for Mobile */
@@ -1552,5 +1556,130 @@ textarea.form-control {
   .header-actions .glass-btn {
     padding: 6px 8px;
     font-size: 0.8rem;
+  }
+}
+
+/* ==========================================================================
+   TIME PICKER UI STYLES (Google Calendar style)
+   ========================================================================== */
+.time-picker-box {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 6px;
+}
+
+.time-row-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.time-label-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  width: 55px;
+}
+
+.time-select-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-select {
+  background: rgba(30, 41, 59, 0.9);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.time-select:focus {
+  border-color: var(--primary-glow);
+}
+
+.am-pm-toggle {
+  display: inline-flex;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.am-pm-toggle button {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.am-pm-toggle button.active {
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.quick-time-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.time-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  border-radius: 16px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.time-chip:hover {
+  background: rgba(99, 102, 241, 0.3);
+  color: #fff;
+  border-color: var(--primary-glow);
+}
+
+/* Print / Save as PDF Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .glass-header, .sidebar, .sidebar-backdrop, .subject-action-bar, .modal-backdrop, #enableNotifyBtn {
+    display: none !important;
+  }
+  .app-layout {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  .content-viewport, .reader-modal-container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+  .reader-body, .reader-text {
+    color: #000000 !important;
   }
 }

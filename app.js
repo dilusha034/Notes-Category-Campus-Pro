@@ -729,12 +729,23 @@ function closeReaderModal() {
   document.getElementById("fullscreenReaderModal").classList.add("hidden");
 }
 
-// Direct 1-Click PDF File Export using html2pdf library & Blob Viewer Fallback for Mobile WebView
+// Direct 1-Click PDF File Export using System Print / Save as PDF
 function exportDirectPDF(targetElementId = "readerContentBody") {
   const element = document.getElementById(targetElementId) || document.getElementById("contentViewport");
   if (!element) return;
 
   showToast("📄 PDF ගොනුව සකස් කරමින් පවතී...");
+
+  // On Android WebView or Mobile, window.print() invokes Android's Native "Save as PDF" dialog
+  try {
+    if (window.Capacitor || /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      setTimeout(() => {
+        window.print();
+      }, 300);
+      showToast("✅ System PDF Dialog එකෙන් 'Save as PDF' තෝරන්න!");
+      return;
+    }
+  } catch (e) {}
 
   if (window.html2pdf) {
     const opt = {
@@ -748,20 +759,12 @@ function exportDirectPDF(targetElementId = "readerContentBody") {
     html2pdf().set(opt).from(element).toPdf().get('pdf').then(pdf => {
       const blob = pdf.output('blob');
       const blobUrl = URL.createObjectURL(blob);
-      
-      // 1. Direct Blob Download
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = `Notes_Category_${Date.now()}.pdf`;
       document.body.appendChild(a);
       a.click();
-      
-      // 2. Mobile WebView Fallback: Open PDF in new tab/window for direct viewing & saving
-      setTimeout(() => {
-        window.open(blobUrl, '_blank');
-      }, 400);
-
-      showToast("✅ PDF සකස් විය! Screen එකේ දිස්වන PDF එක Save කරගන්න.");
+      showToast("✅ PDF ගොනුව සාර්ථකව Download විය!");
     }).catch(err => {
       window.print();
     });
@@ -886,7 +889,25 @@ function triggerClassNotification(slot, minsRemaining) {
   // 2. Play Audio Chime Sound Alert
   playNotificationSound();
 
-  // 3. Desktop / Browser Push Notification
+  // 3. Capacitor Native Android System Tray Notification
+  try {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+      window.Capacitor.Plugins.LocalNotifications.schedule({
+        notifications: [
+          {
+            title: `🔔 ${slot.subject}`,
+            body: `වේලාව: ${slot.time} | ස්ථානය: ${slot.location || 'සඳහන් නැත'} (${timeText})`,
+            id: Math.floor(Math.random() * 100000),
+            schedule: { at: new Date(Date.now() + 100) }
+          }
+        ]
+      });
+    }
+  } catch (err) {
+    console.log("Native notification error:", err);
+  }
+
+  // 4. Desktop / Browser Push Notification
   if ("Notification" in window && Notification.permission === "granted") {
     try {
       new Notification(title, {
@@ -1425,17 +1446,69 @@ function deleteModule(facId, yrId, semId, subId, modId) {
   }
 }
 
-// Timetable Slot Modal (ADD & EDIT)
+// Timetable Slot Modal (ADD & EDIT with Google Calendar style Time Picker)
 function openTimetableSlotModal(dayIdx, slotId = null) {
   const dayObj = state.timetable[dayIdx];
   if (!dayObj) return;
 
   const existingSlot = slotId ? dayObj.slots.find(s => s.id === slotId) : null;
+  const initialTime = existingSlot ? existingSlot.time : "08:30 AM - 10:30 AM";
 
   const body = `
     <div class="form-group">
-      <label>වේලාව (Time Slot)</label>
-      <input type="text" id="slotTimeInput" class="form-control" value="${existingSlot ? escapeHTML(existingSlot.time) : ''}" placeholder="08:30 AM - 10:30 AM">
+      <label><i class="fa-regular fa-clock"></i> වේලාව තෝරන්න (Time Selector)</label>
+      
+      <!-- Interactive Time Selector Box -->
+      <div class="time-picker-box">
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">වේගවත් තේරීම් (Quick Presets):</div>
+        <div class="quick-time-chips">
+          <span class="time-chip" onclick="applyPresetTime('08:30 AM - 10:30 AM')">08:30 AM - 10:30 AM</span>
+          <span class="time-chip" onclick="applyPresetTime('10:30 AM - 12:30 PM')">10:30 AM - 12:30 PM</span>
+          <span class="time-chip" onclick="applyPresetTime('01:00 PM - 03:00 PM')">01:00 PM - 03:00 PM</span>
+          <span class="time-chip" onclick="applyPresetTime('03:00 PM - 05:00 PM')">03:00 PM - 05:00 PM</span>
+          <span class="time-chip" onclick="applyPresetTime('05:00 PM - 07:00 PM')">05:00 PM - 07:00 PM</span>
+        </div>
+
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+          <!-- Start Time -->
+          <div class="time-row-container">
+            <span class="time-label-sub">ආරම්භය:</span>
+            <div class="time-select-group">
+              <select id="startHourSel" class="time-select" onchange="updateCustomTimePicker()">
+                ${[1,2,3,4,5,6,7,8,9,10,11,12].map(h => `<option value="${h < 10 ? '0'+h : h}" ${h===8?'selected':''}>${h < 10 ? '0'+h : h}</option>`).join('')}
+              </select>
+              <span style="color: var(--text-muted); font-weight: bold;">:</span>
+              <select id="startMinSel" class="time-select" onchange="updateCustomTimePicker()">
+                ${['00','15','30','45'].map(m => `<option value="${m}" ${m==='30'?'selected':''}>${m}</option>`).join('')}
+              </select>
+              <select id="startAmpmSel" class="time-select" onchange="updateCustomTimePicker()">
+                <option value="AM" selected>AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- End Time -->
+          <div class="time-row-container">
+            <span class="time-label-sub">අවසානය:</span>
+            <div class="time-select-group">
+              <select id="endHourSel" class="time-select" onchange="updateCustomTimePicker()">
+                ${[1,2,3,4,5,6,7,8,9,10,11,12].map(h => `<option value="${h < 10 ? '0'+h : h}" ${h===10?'selected':''}>${h < 10 ? '0'+h : h}</option>`).join('')}
+              </select>
+              <span style="color: var(--text-muted); font-weight: bold;">:</span>
+              <select id="endMinSel" class="time-select" onchange="updateCustomTimePicker()">
+                ${['00','15','30','45'].map(m => `<option value="${m}" ${m==='30'?'selected':''}>${m}</option>`).join('')}
+              </select>
+              <select id="endAmpmSel" class="time-select" onchange="updateCustomTimePicker()">
+                <option value="AM" selected>AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <input type="text" id="slotTimeInput" class="form-control" style="margin-top: 8px;" value="${escapeHTML(initialTime)}" placeholder="08:30 AM - 10:30 AM">
     </div>
     <div class="form-group">
       <label>විෂය / මාතෘකාව (Subject Name)</label>
@@ -1488,6 +1561,25 @@ function openTimetableSlotModal(dayIdx, slotId = null) {
     showToast(existingSlot ? "කාලසටහන් අයිතමය යාවත්කාලීන විය!" : "කාලසටහනට එකතු විය!");
     return true;
   });
+}
+
+function applyPresetTime(presetStr) {
+  const input = document.getElementById("slotTimeInput");
+  if (input) input.value = presetStr;
+}
+
+function updateCustomTimePicker() {
+  const sh = document.getElementById("startHourSel").value;
+  const sm = document.getElementById("startMinSel").value;
+  const sa = document.getElementById("startAmpmSel").value;
+
+  const eh = document.getElementById("endHourSel").value;
+  const em = document.getElementById("endMinSel").value;
+  const ea = document.getElementById("endAmpmSel").value;
+
+  const timeStr = `${sh}:${sm} ${sa} - ${eh}:${em} ${ea}`;
+  const input = document.getElementById("slotTimeInput");
+  if (input) input.value = timeStr;
 }
 
 function deleteTimetableSlot(dayIdx, slotId) {
