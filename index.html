@@ -75,8 +75,8 @@
   <!-- Mobile Backdrop Overlay for Sidebar -->
   <div class="sidebar-backdrop hidden" id="sidebarBackdrop"></div>
 
-  <!-- Main Workspace -->
-  <div class="app-layout">
+  <!-- Main Workspace Wrapper -->
+  <div class="workspace-wrapper">
     <!-- Left Sidebar: VS Code style navigation panel -->
     <aside class="sidebar glass-panel" id="mainSidebar">
       <div class="sidebar-mobile-header">
@@ -110,10 +110,13 @@
       </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="content-viewport glass-panel" id="contentViewport">
-      <!-- Content view will be rendered here dynamically -->
-    </main>
+    <!-- Main Content Layout -->
+    <div class="app-layout">
+      <!-- Main Content Area -->
+      <main class="content-viewport glass-panel" id="contentViewport">
+        <!-- Content view will be rendered here dynamically -->
+      </main>
+    </div>
   </div>
 
   <!-- Universal Modal for Adding/Editing Items -->
