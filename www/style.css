@@ -1373,30 +1373,32 @@ textarea.form-control {
     top: 0 !important;
     bottom: 0 !important;
     left: -320px;
-    width: 310px;
+    width: 315px;
     max-width: 88vw;
+    height: 100% !important;
     height: 100vh !important;
     height: 100dvh !important;
-    height: 100% !important;
-    max-height: 100vh !important;
-    max-height: 100dvh !important;
+    height: -webkit-fill-available !important;
+    min-height: 100% !important;
+    max-height: none !important;
     margin: 0 !important;
     border-radius: 0 20px 20px 0 !important;
-    z-index: 10000 !important;
+    z-index: 99999 !important;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 15px 0 50px rgba(0, 0, 0, 0.9);
-    padding: 14px 12px 30px 12px !important;
+    padding: 14px 10px 0px 10px !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
   }
 
   .faculties-tree-container {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1 !important;
+    overflow-y: auto !important;
     max-height: none !important;
-    height: 100%;
-    padding-bottom: 70px !important;
+    height: 100% !important;
+    padding-bottom: 140px !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   .sidebar.mobile-open {
