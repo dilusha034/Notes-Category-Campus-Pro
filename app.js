@@ -274,8 +274,13 @@ function bindEvents() {
 
   if (sidebarToggleBtn) {
     sidebarToggleBtn.addEventListener("click", () => {
-      mainSidebar.classList.toggle("mobile-open");
+      const isOpen = mainSidebar.classList.toggle("mobile-open");
       sidebarBackdrop.classList.toggle("hidden");
+      if (isOpen) {
+        document.body.classList.add("sidebar-open");
+      } else {
+        document.body.classList.remove("sidebar-open");
+      }
     });
   }
 
@@ -302,6 +307,7 @@ function closeMobileSidebar() {
   const sidebarBackdrop = document.getElementById("sidebarBackdrop");
   if (mainSidebar) mainSidebar.classList.remove("mobile-open");
   if (sidebarBackdrop) sidebarBackdrop.classList.add("hidden");
+  document.body.classList.remove("sidebar-open");
 }
 
 function updateNavActiveState() {

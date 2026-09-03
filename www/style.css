@@ -24,7 +24,7 @@
   --font-main: 'Inter', 'Noto Sans Sinhala', -apple-system, BlinkMacSystemFont, sans-serif;
 
   --header-height: 72px;
-  --sidebar-width: 340px;
+  --sidebar-width: 275px;
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
@@ -383,28 +383,35 @@ body {
 
 .workspace-wrapper {
   display: flex;
-  gap: 20px;
-  max-width: 1650px;
-  margin: 20px auto;
-  padding: 0 24px;
-  min-height: calc(100vh - var(--header-height) - 60px);
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  margin: 12px auto;
+  padding: 0 16px;
+  min-height: calc(100vh - var(--header-height) - 30px);
+  box-sizing: border-box;
 }
 
 .app-layout {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .sidebar {
   width: var(--sidebar-width);
   flex-shrink: 0;
-  padding: 16px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-height: calc(100vh - var(--header-height) - 40px);
+  gap: 14px;
+  max-height: calc(100vh - var(--header-height) - 30px);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .sidebar.mobile-open {
@@ -627,10 +634,14 @@ body {
 
 .content-viewport {
   flex: 1;
-  padding: 28px;
+  min-width: 0;
+  padding: 20px 24px;
   overflow-y: auto;
-  max-height: calc(100vh - var(--header-height) - 40px);
+  overflow-x: hidden;
+  max-height: calc(100vh - var(--header-height) - 30px);
   position: relative;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 /* Timetable Styles */
@@ -1390,6 +1401,15 @@ textarea.form-control {
     display: none;
   }
 
+  /* Body Background Scroll Lock when Mobile Sidebar is Open */
+  body.sidebar-open {
+    overflow: hidden !important;
+    touch-action: none !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
   /* Mobile Collapsible Sidebar Fixes - Guaranteed True 100% Edge-to-Edge Full Screen Height */
   .sidebar-mobile-header {
     display: flex !important;
@@ -1417,15 +1437,19 @@ textarea.form-control {
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
   }
 
   .faculties-tree-container {
     flex: 1 !important;
     overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
     max-height: none !important;
     height: 100% !important;
-    padding-bottom: 160px !important;
-    -webkit-overflow-scrolling: touch;
+    padding-bottom: 280px !important;
   }
 
   .sidebar.mobile-open {
