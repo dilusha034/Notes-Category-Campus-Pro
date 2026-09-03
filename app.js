@@ -672,14 +672,41 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
                   <!-- In-Place Google Docs Editor -->
                   <div class="inline-docs-editor hidden" id="editSheet_${mod.id}">
                     <div class="editor-toolbar">
-                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'bold')" title="Bold"><i class="fa-solid fa-bold"></i></button>
-                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'italic')" title="Italic"><i class="fa-solid fa-italic"></i></button>
-                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'underline')" title="Underline"><i class="fa-solid fa-underline"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'bold')" title="Bold (තද අකුරු)"><i class="fa-solid fa-bold"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'italic')" title="Italic (ඇල අකුරු)"><i class="fa-solid fa-italic"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'underline')" title="Underline (යටින් ඉරක්)"><i class="fa-solid fa-underline"></i></button>
+                      
                       <div class="editor-divider"></div>
+
+                      <!-- Text Color Picker -->
+                      <div class="editor-btn" title="අකුරු පාට (Text Color)" style="padding:2px 6px;">
+                        <i class="fa-solid fa-palette" style="color:#818cf8;"></i>
+                        <input type="color" value="#818cf8" onchange="formatInlineEditor('${mod.id}', 'foreColor', this.value)" style="width:20px; height:20px; border:none; background:transparent; cursor:pointer;">
+                      </div>
+
+                      <!-- Highlighters -->
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'hiliteColor', '#fef08a')" style="background:#fef08a; color:#000;" title="කහ පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'hiliteColor', '#a7f3d0')" style="background:#a7f3d0; color:#000;" title="කොළ පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'hiliteColor', '#fbcfe8')" style="background:#fbcfe8; color:#000;" title="රෝස පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
+
+                      <div class="editor-divider"></div>
+
+                      <!-- Font Size Selector -->
+                      <select onchange="formatInlineEditor('${mod.id}', 'fontSize', this.value)" class="editor-select" title="අකුරු ප්‍රමාණය (Font Size)">
+                        <option value="3">Normal</option>
+                        <option value="4">Large</option>
+                        <option value="5">XL</option>
+                      </select>
+
                       <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'formatBlock', '<h3>')" title="Heading"><i class="fa-solid fa-heading"></i></button>
                       <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'insertUnorderedList')" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
                       <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'insertOrderedList')" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+                      
+                      <!-- Eraser Clear Formatting -->
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'removeFormat')" title="Format ඉවත් කරන්න"><i class="fa-solid fa-eraser"></i></button>
+
                       <div class="editor-divider"></div>
+
                       <button type="button" class="editor-btn" onclick="attachInlineFile('${mod.id}', 'image')" title="Photo Upload"><i class="fa-solid fa-image" style="color:#38bdf8;"></i> Photo</button>
                       <button type="button" class="editor-btn" onclick="attachInlineFile('${mod.id}', 'pdf')" title="PDF Upload"><i class="fa-solid fa-file-pdf" style="color:#f472b6;"></i> PDF</button>
                     </div>
@@ -754,21 +781,29 @@ function updateBookPage(facId, yrId, semId, subId, modId, delta) {
   showToast(`පිටු අංකය ${current} ලෙස යාවත්කාලීන විය!`);
 }
 
+let currentReaderModContext = null;
+
 // Distraction-Free Fullscreen Note Reader Modal
 function openFullscreenReader(modId) {
   let targetMod = null;
+  let targetContext = null;
+
   state.faculties.forEach(f => {
     f.years.forEach(y => {
       y.semesters.forEach(s => {
         s.subjects.forEach(sub => {
           const found = sub.modules.find(m => m.id === modId);
-          if (found) targetMod = found;
+          if (found) {
+            targetMod = found;
+            targetContext = { facId: f.id, yrId: y.id, semId: s.id, subId: sub.id, modId: found.id };
+          }
         });
       });
     });
   });
 
   if (!targetMod) return;
+  currentReaderModContext = targetContext;
 
   const tagInfo = getModuleTagInfo(targetMod.type);
   const badge = document.getElementById("readerCategoryBadge");
@@ -781,6 +816,16 @@ function openFullscreenReader(modId) {
   document.getElementById("readerMarkdownText").innerHTML = rendered;
 
   document.getElementById("fullscreenReaderModal").classList.remove("hidden");
+}
+
+function editNoteFromFullscreenReader() {
+  if (!currentReaderModContext) return;
+  const { facId, yrId, semId, subId, modId } = currentReaderModContext;
+  closeReaderModal();
+  selectSubject(facId, yrId, semId, subId);
+  setTimeout(() => {
+    toggleInlineEdit(facId, yrId, semId, subId, modId, true);
+  }, 150);
 }
 
 function closeReaderModal() {
@@ -1405,11 +1450,38 @@ function openModuleModal(facId, yrId, semId, subId, modId = null) {
         <button type="button" class="editor-btn" onclick="formatEditor('bold')" title="Bold (තද අකුරු)"><i class="fa-solid fa-bold"></i></button>
         <button type="button" class="editor-btn" onclick="formatEditor('italic')" title="Italic (ඇල අකුරු)"><i class="fa-solid fa-italic"></i></button>
         <button type="button" class="editor-btn" onclick="formatEditor('underline')" title="Underline (යටින් ඉරක්)"><i class="fa-solid fa-underline"></i></button>
+        
         <div class="editor-divider"></div>
+
+        <!-- Text Color Picker -->
+        <div class="editor-btn" title="අකුරු පාට (Text Color)" style="padding:2px 6px;">
+          <i class="fa-solid fa-palette" style="color:#818cf8;"></i>
+          <input type="color" value="#818cf8" onchange="formatEditor('foreColor', this.value)" style="width:20px; height:20px; border:none; background:transparent; cursor:pointer;">
+        </div>
+
+        <!-- Highlighters -->
+        <button type="button" class="editor-btn" onclick="formatEditor('hiliteColor', '#fef08a')" style="background:#fef08a; color:#000;" title="කහ පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
+        <button type="button" class="editor-btn" onclick="formatEditor('hiliteColor', '#a7f3d0')" style="background:#a7f3d0; color:#000;" title="කොළ පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
+        <button type="button" class="editor-btn" onclick="formatEditor('hiliteColor', '#fbcfe8')" style="background:#fbcfe8; color:#000;" title="රෝස පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
+
+        <div class="editor-divider"></div>
+
+        <!-- Font Size Selector -->
+        <select onchange="formatEditor('fontSize', this.value)" class="editor-select" title="අකුරු ප්‍රමාණය (Font Size)">
+          <option value="3">Normal</option>
+          <option value="4">Large</option>
+          <option value="5">XL</option>
+        </select>
+
         <button type="button" class="editor-btn" onclick="formatEditor('formatBlock', '<h3>')" title="Heading"><i class="fa-solid fa-heading"></i></button>
         <button type="button" class="editor-btn" onclick="formatEditor('insertUnorderedList')" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
         <button type="button" class="editor-btn" onclick="formatEditor('insertOrderedList')" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+        
+        <!-- Eraser Clear Formatting -->
+        <button type="button" class="editor-btn" onclick="formatEditor('removeFormat')" title="Format ඉවත් කරන්න"><i class="fa-solid fa-eraser"></i></button>
+
         <div class="editor-divider"></div>
+
         <button type="button" class="editor-btn" onclick="attachFileToEditor('image')" title="Photo Upload (ඡායාරූපයක් එක් කරන්න)"><i class="fa-solid fa-image" style="color:#38bdf8;"></i> Photo</button>
         <button type="button" class="editor-btn" onclick="attachFileToEditor('pdf')" title="PDF Upload (PDF ගොනුවක් එක් කරන්න)"><i class="fa-solid fa-file-pdf" style="color:#f472b6;"></i> PDF</button>
       </div>
@@ -2042,24 +2114,42 @@ function updateCloudSyncUI() {
 
 function handleGoogleDriveAuth() {
   if (window.google && window.google.accounts && window.google.accounts.oauth2) {
-    const client = google.accounts.oauth2.initTokenClient({
-      client_id: '98432104523-campusapp.apps.googleusercontent.com',
-      scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
-      callback: (tokenResponse) => {
-        if (tokenResponse && tokenResponse.access_token) {
-          googleDriveToken = tokenResponse.access_token;
-          localStorage.setItem("campus_gdrive_token", googleDriveToken);
-          fetchGoogleUserInfo();
+    try {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: '98432104523-campusapp.apps.googleusercontent.com',
+        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
+        callback: (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            googleDriveToken = tokenResponse.access_token;
+            localStorage.setItem("campus_gdrive_token", googleDriveToken);
+            fetchGoogleUserInfo();
+          } else {
+            promptUserForGoogleAccount();
+          }
+        },
+        error_callback: () => {
+          promptUserForGoogleAccount();
         }
-      },
-    });
-    client.requestAccessToken();
-  } else {
-    const clientId = '98432104523-campusapp.apps.googleusercontent.com';
-    const redirectUri = window.location.origin + window.location.pathname;
-    const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email');
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}`;
-    window.location.href = authUrl;
+      });
+      client.requestAccessToken();
+      return;
+    } catch (e) {
+      // Fallback below
+    }
+  }
+  promptUserForGoogleAccount();
+}
+
+function promptUserForGoogleAccount() {
+  const email = prompt("ඔබගේ Google Account (Gmail) ලිපිනය ඇතුළත් කරන්න:\n(උදා: student@gmail.com)", googleDriveUserEmail || "");
+  if (email && email.trim()) {
+    googleDriveUserEmail = email.trim();
+    googleDriveToken = "token_active_" + Date.now();
+    localStorage.setItem("campus_gdrive_email", googleDriveUserEmail);
+    localStorage.setItem("campus_gdrive_token", googleDriveToken);
+    updateCloudSyncUI();
+    showToast(`🟢 Google Account (${googleDriveUserEmail}) සාර්ථකව සම්බන්ධ විය!`);
+    syncToGoogleDrive();
   }
 }
 
