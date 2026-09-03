@@ -819,10 +819,10 @@ function openFullscreenReader(modId) {
   const rendered = targetMod.contentHtml || (marked.parse ? marked.parse(targetMod.content || '') : targetMod.content);
   const textEl = document.getElementById("readerMarkdownText");
   textEl.innerHTML = rendered;
-  textEl.style.display = "block";
+  textEl.classList.remove("hidden");
 
   const editorContainer = document.getElementById("readerEditorContainer");
-  if (editorContainer) editorContainer.style.display = "none";
+  if (editorContainer) editorContainer.classList.add("hidden");
 
   const btnText = document.getElementById("readerEditBtnText");
   if (btnText) btnText.textContent = "සංස්කරණය (Edit Note)";
@@ -841,8 +841,8 @@ function toggleFullscreenReaderEdit() {
 
   if (!isFullscreenReaderEditing) {
     isFullscreenReaderEditing = true;
-    textEl.style.display = "none";
-    editorContainer.style.display = "flex";
+    textEl.classList.add("hidden");
+    editorContainer.classList.remove("hidden");
     if (btnText) btnText.textContent = "💾 සුරකින්න (Save Note)";
 
     const mod = currentReaderModContext.mod;
@@ -891,8 +891,8 @@ function toggleFullscreenReaderEdit() {
     renderMainView();
 
     textEl.innerHTML = newHtml;
-    textEl.style.display = "block";
-    editorContainer.style.display = "none";
+    textEl.classList.remove("hidden");
+    editorContainer.classList.add("hidden");
     isFullscreenReaderEditing = false;
     if (btnText) btnText.textContent = "සංස්කරණය (Edit Note)";
 
