@@ -1412,6 +1412,92 @@ function openModuleModal(facId, yrId, semId, subId, modId = null) {
     showToast(existingMod ? "අයිතමය යාවත්කාලීන විය!" : "නව අයිතමය එකතු විය!");
     return true;
   });
+
+  setTimeout(() => {
+    const inputEl = document.getElementById("modContentInput");
+    if (inputEl) {
+      inputEl.addEventListener("paste", (e) => {
+        const htmlData = e.clipboardData.getData("text/html");
+        if (htmlData && htmlData.trim().length > 0) {
+          const markdown = convertHtmlToMarkdown(htmlData);
+          if (markdown && markdown.trim().length > 0) {
+            e.preventDefault();
+            const start = inputEl.selectionStart || 0;
+            const end = inputEl.selectionEnd || 0;
+            const val = inputEl.value;
+            inputEl.value = val.substring(0, start) + markdown + val.substring(end);
+            inputEl.selectionStart = inputEl.selectionEnd = start + markdown.length;
+            showToast("ChatGPT / Gemini Paste එක Markdown ලෙස Auto-Format විය! ✨");
+          }
+        }
+      });
+    }
+  }, 100);
+}
+
+function convertHtmlToMarkdown(html) {
+  if (!html) return "";
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  function traverse(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return "";
+    }
+
+    const tag = node.tagName.toLowerCase();
+    let childrenText = Array.from(node.childNodes).map(traverse).join("");
+
+    switch (tag) {
+      case "h1":
+        return `\n# ${childrenText.trim()}\n\n`;
+      case "h2":
+        return `\n## ${childrenText.trim()}\n\n`;
+      case "h3":
+        return `\n### ${childrenText.trim()}\n\n`;
+      case "h4":
+        return `\n#### ${childrenText.trim()}\n\n`;
+      case "h5":
+      case "h6":
+        return `\n##### ${childrenText.trim()}\n\n`;
+      case "strong":
+      case "b":
+        return ` **${childrenText.trim()}** `;
+      case "em":
+      case "i":
+        return ` *${childrenText.trim()}* `;
+      case "code":
+        return ` \`${childrenText.trim()}\` `;
+      case "pre":
+        return `\n\`\`\`\n${childrenText.trim()}\n\`\`\`\n\n`;
+      case "blockquote":
+        return `\n> ${childrenText.trim()}\n\n`;
+      case "p":
+        return `\n${childrenText.trim()}\n\n`;
+      case "br":
+        return `\n`;
+      case "li": {
+        const parentTag = node.parentElement ? node.parentElement.tagName.toLowerCase() : "";
+        if (parentTag === "ol") {
+          const index = Array.from(node.parentElement.children).indexOf(node) + 1;
+          return `${index}. ${childrenText.trim()}\n`;
+        }
+        return `* ${childrenText.trim()}\n`;
+      }
+      case "ul":
+      case "ol":
+        return `\n${childrenText}\n`;
+      default:
+        return childrenText;
+    }
+  }
+
+  let result = traverse(doc.body);
+  result = result.replace(/\n{3,}/g, "\n\n").trim();
+  return result;
 }
 
 function toggleModuleModalFields(val) {
