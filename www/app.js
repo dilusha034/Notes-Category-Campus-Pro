@@ -266,6 +266,11 @@ function bindEvents() {
   document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
   document.getElementById("closeReaderBtn").addEventListener("click", closeReaderModal);
 
+  const closeDrawerBtn = document.getElementById("closeMediaDrawerBtn");
+  if (closeDrawerBtn) closeDrawerBtn.addEventListener("click", closeMediaDrawer);
+  const mediaOverlay = document.getElementById("mediaDrawerOverlay");
+  if (mediaOverlay) mediaOverlay.addEventListener("click", closeMediaDrawer);
+
   // Mobile Sidebar Toggle Events
   const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
   const closeSidebarBtn = document.getElementById("closeSidebarBtn");
@@ -595,7 +600,7 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
         ` : filteredModules.map(mod => {
           const isOpen = state.openAccordions.has(mod.id);
           const tagInfo = getModuleTagInfo(mod.type);
-          const renderedMarkdown = marked.parse ? marked.parse(mod.content || '') : mod.content;
+          const renderedMarkdown = mod.contentHtml || (marked.parse ? marked.parse(mod.content || '') : mod.content);
 
           return `
             <div class="accordion-card ${isOpen ? 'open' : ''}" id="acc_${mod.id}">
@@ -649,6 +654,11 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
           `;
         }).join("")}
       </div>
+
+      <!-- Google Docs Style Floating Action Button (Pencil Icon) -->
+      <button class="fab-edit-btn" onclick="openModuleModal('${facId}', '${yrId}', '${semId}', '${subId}')" title="නව සටහනක් / පොතක් එකතු කරන්න">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </button>
     </div>
   `;
 }
@@ -725,7 +735,7 @@ function openFullscreenReader(modId) {
 
   document.getElementById("readerTitle").textContent = targetMod.title;
   
-  const rendered = marked.parse ? marked.parse(targetMod.content || '') : targetMod.content;
+  const rendered = targetMod.contentHtml || (marked.parse ? marked.parse(targetMod.content || '') : targetMod.content);
   document.getElementById("readerMarkdownText").innerHTML = rendered;
 
   document.getElementById("fullscreenReaderModal").classList.remove("hidden");
@@ -1346,22 +1356,25 @@ function openModuleModal(facId, yrId, semId, subId, modId = null) {
       <input type="text" id="modTitleInput" class="form-control" value="${existingMod ? escapeHTML(existingMod.title) : ''}" placeholder="උදා: 01. පරිගණක ජාලකරණය">
     </div>
 
-    <!-- Photo / Image Attachment Field -->
+    <!-- Google Docs Style Rich Text Editor -->
     <div class="form-group">
-      <label><i class="fa-solid fa-image" style="color:var(--secondary-accent)"></i> ඡායාරූපයක් / Photo Attachment (Image Link හෝ Upload)</label>
-      <div style="display:flex; gap:8px;">
-        <input type="text" id="imgUrlInput" class="form-control" placeholder="https://example.com/photo.jpg">
-        <button type="button" class="glass-btn" onclick="document.getElementById('imgFileInput').click()"><i class="fa-solid fa-upload"></i> Upload</button>
-        <input type="file" id="imgFileInput" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this)">
+      <label><i class="fa-solid fa-file-signature" style="color:var(--primary-glow)"></i> Google Docs Style Editor & Media Attachments</label>
+      <div class="editor-toolbar">
+        <button type="button" class="editor-btn" onclick="formatEditor('bold')" title="Bold (තද අකුරු)"><i class="fa-solid fa-bold"></i></button>
+        <button type="button" class="editor-btn" onclick="formatEditor('italic')" title="Italic (ඇල අකුරු)"><i class="fa-solid fa-italic"></i></button>
+        <button type="button" class="editor-btn" onclick="formatEditor('underline')" title="Underline (යටින් ඉරක්)"><i class="fa-solid fa-underline"></i></button>
+        <div class="editor-divider"></div>
+        <button type="button" class="editor-btn" onclick="formatEditor('formatBlock', '<h3>')" title="Heading"><i class="fa-solid fa-heading"></i></button>
+        <button type="button" class="editor-btn" onclick="formatEditor('insertUnorderedList')" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+        <button type="button" class="editor-btn" onclick="formatEditor('insertOrderedList')" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+        <div class="editor-divider"></div>
+        <button type="button" class="editor-btn" onclick="attachFileToEditor('image')" title="Photo Upload (ඡායාරූපයක් එක් කරන්න)"><i class="fa-solid fa-image" style="color:#38bdf8;"></i> Photo</button>
+        <button type="button" class="editor-btn" onclick="attachFileToEditor('pdf')" title="PDF Upload (PDF ගොනුවක් එක් කරන්න)"><i class="fa-solid fa-file-pdf" style="color:#f472b6;"></i> PDF</button>
       </div>
-    </div>
-
-    <div class="form-group">
-      <label>විස්තරය / Markdown සටහන (Formatting Support Enabled ⭐)</label>
-      <p style="font-size:0.78rem; color:var(--text-muted);">
-        මෙහි #, ##, ###, **bold**, *italic*, > quotes, 1. 2. ලැයිස්තු, Brave/Gemini Paste auto-format වේ.
+      <div id="editorContentEditable" class="editor-contenteditable" contenteditable="true" placeholder="ඔබගේ සටහන් හෝ AI මාදිලියකින් Copy කළ ලිපිය මෙතැනට Paste කරන්න...">${existingMod ? (existingMod.contentHtml || (marked.parse ? marked.parse(existingMod.content || '') : existingMod.content)) : ''}</div>
+      <p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
+        💡 ChatGPT / Gemini / AI වලින් Copy කළ ලිපිය මෙතැනට Paste කළ විට ස්වයංක්‍රීයව Bold, Colors, Headers සකස් වේ.
       </p>
-      <textarea id="modContentInput" class="form-control" placeholder="ඔබගේ සටහන් හෝ Copy කළ ලිපිය මෙතැනට Paste කරන්න...">${existingMod ? escapeHTML(existingMod.content) : ''}</textarea>
     </div>
   `;
 
@@ -1370,22 +1383,20 @@ function openModuleModal(facId, yrId, semId, subId, modId = null) {
   showModal(modalTitle, body, () => {
     const type = document.getElementById("modTypeInput").value;
     const title = document.getElementById("modTitleInput").value.trim();
-    let content = document.getElementById("modContentInput").value;
-    const imgUrl = document.getElementById("imgUrlInput").value.trim();
+    const editor = document.getElementById("editorContentEditable");
+    const contentHtml = editor ? editor.innerHTML : '';
+    const contentText = editor ? editor.innerText : '';
 
     if (!title) {
       showToast("කරුණාකර මාතෘකාවක් ඇතුළත් කරන්න!");
       return false;
     }
 
-    if (imgUrl) {
-      content += `\n\n![Photo Attachment](${imgUrl})`;
-    }
-
     if (existingMod) {
       existingMod.type = type;
       existingMod.title = title;
-      existingMod.content = content;
+      existingMod.contentHtml = contentHtml;
+      existingMod.content = contentText;
       if (type === 'book') {
         existingMod.bookAuthor = document.getElementById("bookAuthorInput").value.trim();
         existingMod.bookPublisher = document.getElementById("bookPublisherInput").value.trim();
@@ -1397,11 +1408,13 @@ function openModuleModal(facId, yrId, semId, subId, modId = null) {
         id: "mod_" + Date.now(),
         type: type,
         title: title,
-        content: content,
+        contentHtml: contentHtml,
+        content: contentText,
         bookAuthor: type === 'book' ? document.getElementById("bookAuthorInput").value.trim() : '',
         bookPublisher: type === 'book' ? document.getElementById("bookPublisherInput").value.trim() : '',
         libraryId: type === 'book' ? document.getElementById("bookLibraryIdInput").value.trim() : '',
-        currentPage: type === 'book' ? (parseInt(document.getElementById("bookPageInput").value) || 1) : 1
+        currentPage: type === 'book' ? (parseInt(document.getElementById("bookPageInput").value) || 1) : 1,
+        bookmarkedPage: 1
       };
       sub.modules.push(newMod);
       state.openAccordions.add(newMod.id);
@@ -1413,91 +1426,128 @@ function openModuleModal(facId, yrId, semId, subId, modId = null) {
     return true;
   });
 
+  // Attach Smart AI Copy-Paste Listener
   setTimeout(() => {
-    const inputEl = document.getElementById("modContentInput");
-    if (inputEl) {
-      inputEl.addEventListener("paste", (e) => {
-        const htmlData = e.clipboardData.getData("text/html");
-        if (htmlData && htmlData.trim().length > 0) {
-          const markdown = convertHtmlToMarkdown(htmlData);
-          if (markdown && markdown.trim().length > 0) {
-            e.preventDefault();
-            const start = inputEl.selectionStart || 0;
-            const end = inputEl.selectionEnd || 0;
-            const val = inputEl.value;
-            inputEl.value = val.substring(0, start) + markdown + val.substring(end);
-            inputEl.selectionStart = inputEl.selectionEnd = start + markdown.length;
-            showToast("ChatGPT / Gemini Paste එක Markdown ලෙස Auto-Format විය! ✨");
-          }
-        }
-      });
+    const ed = document.getElementById("editorContentEditable");
+    if (ed) {
+      ed.addEventListener("paste", handleEditorPaste);
     }
   }, 100);
 }
+// Google Docs Rich Text Formatting Helper
+function formatEditor(cmd, val = null) {
+  document.execCommand(cmd, false, val);
+}
 
-function convertHtmlToMarkdown(html) {
-  if (!html) return "";
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
+// Smart AI Copy-Paste Auto-Formatter (Markdown -> HTML)
+function handleEditorPaste(e) {
+  e.preventDefault();
+  const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+  if (!text) return;
 
-  function traverse(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      return node.textContent;
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) {
-      return "";
-    }
-
-    const tag = node.tagName.toLowerCase();
-    let childrenText = Array.from(node.childNodes).map(traverse).join("");
-
-    switch (tag) {
-      case "h1":
-        return `\n# ${childrenText.trim()}\n\n`;
-      case "h2":
-        return `\n## ${childrenText.trim()}\n\n`;
-      case "h3":
-        return `\n### ${childrenText.trim()}\n\n`;
-      case "h4":
-        return `\n#### ${childrenText.trim()}\n\n`;
-      case "h5":
-      case "h6":
-        return `\n##### ${childrenText.trim()}\n\n`;
-      case "strong":
-      case "b":
-        return ` **${childrenText.trim()}** `;
-      case "em":
-      case "i":
-        return ` *${childrenText.trim()}* `;
-      case "code":
-        return ` \`${childrenText.trim()}\` `;
-      case "pre":
-        return `\n\`\`\`\n${childrenText.trim()}\n\`\`\`\n\n`;
-      case "blockquote":
-        return `\n> ${childrenText.trim()}\n\n`;
-      case "p":
-        return `\n${childrenText.trim()}\n\n`;
-      case "br":
-        return `\n`;
-      case "li": {
-        const parentTag = node.parentElement ? node.parentElement.tagName.toLowerCase() : "";
-        if (parentTag === "ol") {
-          const index = Array.from(node.parentElement.children).indexOf(node) + 1;
-          return `${index}. ${childrenText.trim()}\n`;
-        }
-        return `* ${childrenText.trim()}\n`;
-      }
-      case "ul":
-      case "ol":
-        return `\n${childrenText}\n`;
-      default:
-        return childrenText;
-    }
+  let formattedHtml = '';
+  if (typeof marked !== 'undefined' && marked.parse && (text.includes('#') || text.includes('**') || text.includes('```') || text.includes('- '))) {
+    formattedHtml = marked.parse(text);
+  } else {
+    formattedHtml = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
   }
 
-  let result = traverse(doc.body);
-  result = result.replace(/\n{3,}/g, "\n\n").trim();
-  return result;
+  document.execCommand('insertHTML', false, formattedHtml);
+  showToast("AI කේත සහ සටහන් ස්වයංක්‍රීයව සකස් විය!");
+}
+
+// Local File Upload & Inline Attachment Tag Insertion
+function attachFileToEditor(type) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = type === 'image' ? 'image/*' : 'application/pdf';
+  fileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const base64Data = evt.target.result;
+      const fileName = escapeHTML(file.name);
+      
+      let tagHtml = '';
+      if (type === 'image') {
+        tagHtml = ` <span class="inline-attach-tag img-tag" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}')" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName}</span> `;
+      } else {
+        tagHtml = ` <span class="inline-attach-tag pdf-tag" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}')" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName}</span> `;
+      }
+
+      const ed = document.getElementById("editorContentEditable");
+      if (ed) {
+        ed.focus();
+        document.execCommand('insertHTML', false, tagHtml);
+        showToast(type === 'image' ? "ඡායාරූපය සාර්ථකව එකතු විය!" : "PDF ගොනුව සාර්ථකව එකතු විය!");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  fileInput.click();
+}
+
+// Global Media Drawer State
+let currentActiveMedia = { type: null, url: null, title: null, modId: null, pageNum: 1 };
+
+function openMediaDrawer(type, url, title, modId = null, pageNum = 1) {
+  currentActiveMedia = { type, url, title, modId, pageNum: pageNum || 1 };
+  
+  const drawer = document.getElementById("mediaDrawer");
+  const overlay = document.getElementById("mediaDrawerOverlay");
+  const drawerTitle = document.getElementById("mediaDrawerTitle");
+  const drawerIcon = document.getElementById("mediaDrawerIcon");
+  const drawerBody = document.getElementById("mediaDrawerBody");
+  const bookmarkBtn = document.getElementById("bookmarkBtn");
+
+  if (!drawer || !drawerBody) return;
+
+  drawerTitle.textContent = title || (type === 'pdf' ? 'PDF ගොනුව' : 'ඡායාරූපය');
+  drawerIcon.className = type === 'pdf' ? "fa-solid fa-file-pdf" : "fa-solid fa-image";
+  drawerIcon.style.color = type === 'pdf' ? "#ec4899" : "#38bdf8";
+
+  if (type === 'pdf') {
+    bookmarkBtn.style.display = 'inline-flex';
+    drawerBody.innerHTML = `
+      <div class="pdf-bookmark-banner" id="pdfBookmarkBanner">
+        <span><i class="fa-solid fa-bookmark"></i> Bookmark : <strong>පිටු අංකය ${pageNum || 1}</strong></span>
+        <span style="font-size:0.75rem; opacity:0.8;">ඊළඟ වතාවේ මෙතැනින්ම කියවිය හැක</span>
+      </div>
+      <iframe src="${url}#page=${pageNum || 1}" class="pdf-preview-iframe" title="${escapeHTML(title)}"></iframe>
+    `;
+  } else {
+    bookmarkBtn.style.display = 'none';
+    drawerBody.innerHTML = `
+      <img src="${url}" class="img-preview-full" alt="${escapeHTML(title)}">
+    `;
+  }
+
+  drawer.classList.remove("hidden");
+  if (overlay) overlay.classList.remove("hidden");
+}
+
+function closeMediaDrawer() {
+  const drawer = document.getElementById("mediaDrawer");
+  const overlay = document.getElementById("mediaDrawerOverlay");
+  if (drawer) drawer.classList.add("hidden");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+function togglePdfBookmark() {
+  const newPage = prompt("ඔබ දැනට කියවන PDF පිටු අංකය (Page Number) ඇතුළත් කරන්න:", currentActiveMedia.pageNum || 1);
+  if (!newPage) return;
+
+  const parsedPage = parseInt(newPage) || 1;
+  currentActiveMedia.pageNum = parsedPage;
+
+  const banner = document.getElementById("pdfBookmarkBanner");
+  if (banner) {
+    banner.innerHTML = `<span><i class="fa-solid fa-bookmark"></i> Bookmark : <strong>පිටු අංකය ${parsedPage}</strong></span> <span style="font-size:0.75rem; opacity:0.8;">සුරක්ෂිත විය!</span>`;
+  }
+
+  showToast(`PDF Bookmark පිටු අංක ${parsedPage} ලෙස සුරක්ෂිත විය!`);
 }
 
 function toggleModuleModalFields(val) {

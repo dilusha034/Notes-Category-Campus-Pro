@@ -6,10 +6,10 @@
   <title>Notes Category | Campus Student Hub</title>
   <meta name="description" content="Ultimate Glassmorphism Study & Notes Management Platform for Campus Students">
   
-  <!-- Google Fonts -->
+  <!-- Google Fonts for Multi-Language Support (Sinhala, Pali, Sanskrit, CJK) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Sinhala:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+JP:wght@400;600;700&family=Noto+Sans+KR:wght@400;600;700&family=Noto+Sans+Sinhala:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -118,6 +118,26 @@
       </main>
     </div>
   </div>
+
+  <!-- Side Split Media / PDF Viewer Drawer -->
+  <div class="media-drawer-overlay hidden" id="mediaDrawerOverlay"></div>
+  <aside class="media-drawer glass-panel hidden" id="mediaDrawer">
+    <div class="media-drawer-header">
+      <div class="media-drawer-title">
+        <i class="fa-solid fa-file-pdf" id="mediaDrawerIcon" style="color:#ec4899;"></i>
+        <span id="mediaDrawerTitle" style="font-weight:600; font-size:0.95rem;">ගොනු පෙරදසුන</span>
+      </div>
+      <div class="media-drawer-actions">
+        <button class="glass-btn btn-primary btn-sm" id="bookmarkBtn" title="මෙම පිටුව Bookmark කරන්න">
+          <i class="fa-solid fa-bookmark"></i> <span id="bookmarkBtnText">Bookmark</span>
+        </button>
+        <button class="btn-icon" id="closeMediaDrawerBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div class="media-drawer-body" id="mediaDrawerBody">
+      <!-- Dynamically rendered image preview or PDF reader -->
+    </div>
+  </aside>
 
   <!-- Universal Modal for Adding/Editing Items -->
   <div class="modal-overlay hidden" id="universalModal">
