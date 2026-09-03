@@ -1928,6 +1928,10 @@ textarea.form-control {
   box-shadow: 0 12px 32px rgba(236, 72, 153, 0.7);
 }
 
+.hidden {
+  display: none !important;
+}
+
 /* Side Split Media / PDF Reader Drawer */
 .media-drawer-overlay {
   position: fixed;
@@ -1938,6 +1942,10 @@ textarea.form-control {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   z-index: 99999;
+}
+
+.media-drawer-overlay.hidden {
+  display: none !important;
 }
 
 .media-drawer {
