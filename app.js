@@ -694,11 +694,6 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
           `;
         }).join("")}
       </div>
-
-      <!-- Google Docs Style Floating Action Button (Pencil Icon) -->
-      <button class="fab-edit-btn" onclick="openModuleModal('${facId}', '${yrId}', '${semId}', '${subId}')" title="නව සටහනක් / පොතක් එකතු කරන්න">
-        <i class="fa-solid fa-pen-to-square"></i>
-      </button>
     </div>
   `;
 }
@@ -1587,7 +1582,30 @@ function togglePdfBookmark() {
     banner.innerHTML = `<span><i class="fa-solid fa-bookmark"></i> Bookmark : <strong>පිටු අංකය ${parsedPage}</strong></span> <span style="font-size:0.75rem; opacity:0.8;">සුරක්ෂිත විය!</span>`;
   }
 
-  showToast(`PDF Bookmark පිටු අංක ${parsedPage} ලෙස සුරක්ෂිත විය!`);
+  // Reload PDF viewer iframe with page parameter to immediately jump to target page
+  const iframe = document.querySelector(".pdf-preview-iframe");
+  if (iframe && currentActiveMedia.url) {
+    const cleanUrl = currentActiveMedia.url.split('#')[0];
+    iframe.src = `${cleanUrl}#page=${parsedPage}`;
+  }
+
+  if (currentActiveMedia.modId) {
+    state.faculties.forEach(f => {
+      f.years.forEach(y => {
+        y.semesters.forEach(s => {
+          s.subjects.forEach(sub => {
+            const m = sub.modules.find(mod => mod.id === currentActiveMedia.modId);
+            if (m) {
+              m.bookmarkedPage = parsedPage;
+            }
+          });
+        });
+      });
+    });
+    saveState();
+  }
+
+  showToast(`PDF Bookmark පිටු අංක ${parsedPage} වෙතින් සුරක්ෂිත විය!`);
 }
 
 function toggleFullscreenDrawer() {
