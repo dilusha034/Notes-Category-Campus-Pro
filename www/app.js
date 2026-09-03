@@ -171,6 +171,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSidebar();
   renderMainView();
   registerServiceWorker();
+  checkOAuthRedirectToken();
+  if (googleDriveToken) {
+    fetchGoogleUserInfo();
+  }
 });
 
 function registerServiceWorker() {
@@ -202,11 +206,14 @@ function useInitialData() {
   saveState();
 }
 
-function saveState() {
+function saveState(triggerCloud = true) {
   localStorage.setItem("notes_category_data_v3", JSON.stringify({
     faculties: state.faculties,
     timetable: state.timetable
   }));
+  if (triggerCloud && typeof scheduleAutoCloudSync === 'function') {
+    scheduleAutoCloudSync();
+  }
 }
 
 function initMarked() {
@@ -1993,4 +2000,200 @@ function importData(e) {
     }
   };
   reader.readAsText(file);
+}
+
+// ==========================================
+// GOOGLE DRIVE CLOUD SYNC ENGINE
+// ==========================================
+
+let googleDriveToken = localStorage.getItem("campus_gdrive_token") || null;
+let googleDriveUserEmail = localStorage.getItem("campus_gdrive_email") || null;
+let syncTimer = null;
+
+function openCloudSyncModal() {
+  const modal = document.getElementById("cloudSyncModal");
+  if (modal) modal.classList.remove("hidden");
+  updateCloudSyncUI();
+}
+
+function closeCloudSyncModal() {
+  const modal = document.getElementById("cloudSyncModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function updateCloudSyncUI() {
+  const emailEl = document.getElementById("cloudUserEmail");
+  const statusEl = document.getElementById("cloudSyncStatus");
+  const signInBtn = document.getElementById("googleSignInBtn");
+  const controlsGroup = document.getElementById("syncControlsGroup");
+
+  if (googleDriveToken && googleDriveUserEmail) {
+    if (emailEl) emailEl.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#10b981;"></i> Connected: ${escapeHTML(googleDriveUserEmail)}`;
+    if (statusEl) statusEl.textContent = "Google Drive Auto-Sync සක්‍රියව පවතී. Phone එක සහ PC එක අතර සටහන් Sync වේ.";
+    if (signInBtn) signInBtn.classList.add("hidden");
+    if (controlsGroup) controlsGroup.classList.remove("hidden");
+  } else {
+    if (emailEl) emailEl.textContent = "Google සේවාවට සම්බන්ධ වී නැත";
+    if (statusEl) statusEl.textContent = "ඔබගේ Google Drive එක සමඟ Phone එක සහ PC එක Auto Sync කිරීමට Sign in වන්න.";
+    if (signInBtn) signInBtn.classList.remove("hidden");
+    if (controlsGroup) controlsGroup.classList.add("hidden");
+  }
+}
+
+function handleGoogleDriveAuth() {
+  if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: '98432104523-campusapp.apps.googleusercontent.com',
+      scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
+      callback: (tokenResponse) => {
+        if (tokenResponse && tokenResponse.access_token) {
+          googleDriveToken = tokenResponse.access_token;
+          localStorage.setItem("campus_gdrive_token", googleDriveToken);
+          fetchGoogleUserInfo();
+        }
+      },
+    });
+    client.requestAccessToken();
+  } else {
+    const clientId = '98432104523-campusapp.apps.googleusercontent.com';
+    const redirectUri = window.location.origin + window.location.pathname;
+    const scope = encodeURIComponent('https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email');
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${scope}`;
+    window.location.href = authUrl;
+  }
+}
+
+function checkOAuthRedirectToken() {
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    const token = params.get('access_token');
+    if (token) {
+      googleDriveToken = token;
+      localStorage.setItem("campus_gdrive_token", token);
+      window.history.replaceState(null, null, window.location.pathname);
+      fetchGoogleUserInfo();
+    }
+  }
+}
+
+function fetchGoogleUserInfo() {
+  if (!googleDriveToken) return;
+  fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { 'Authorization': `Bearer ${googleDriveToken}` }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data && data.email) {
+      googleDriveUserEmail = data.email;
+      localStorage.setItem("campus_gdrive_email", googleDriveUserEmail);
+      updateCloudSyncUI();
+      showToast(`Google Sign-In සාර්ථකයි! (${data.email})`);
+      syncFromGoogleDrive();
+    }
+  })
+  .catch(err => {
+    console.error("Google UserInfo Error:", err);
+  });
+}
+
+function handleGoogleSignOut() {
+  googleDriveToken = null;
+  googleDriveUserEmail = null;
+  localStorage.removeItem("campus_gdrive_token");
+  localStorage.removeItem("campus_gdrive_email");
+  updateCloudSyncUI();
+  showToast("Google Sign-Out සාර්ථකයි!");
+}
+
+async function syncToGoogleDrive() {
+  if (!googleDriveToken) return;
+
+  try {
+    const backupData = JSON.stringify({
+      faculties: state.faculties,
+      timetable: state.timetable,
+      lastSynced: new Date().toISOString()
+    });
+
+    const searchRes = await fetch("https://www.googleapis.com/drive/v3/files?q=name='Notes_Category_Data.json' and trashed=false", {
+      headers: { 'Authorization': `Bearer ${googleDriveToken}` }
+    });
+    const searchJson = await searchRes.json();
+
+    let fileId = null;
+    if (searchJson.files && searchJson.files.length > 0) {
+      fileId = searchJson.files[0].id;
+    }
+
+    if (fileId) {
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${googleDriveToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: backupData
+      });
+    } else {
+      const metadata = {
+        name: 'Notes_Category_Data.json',
+        mimeType: 'application/json'
+      };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', new Blob([backupData], { type: 'application/json' }));
+
+      await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${googleDriveToken}` },
+        body: form
+      });
+    }
+
+    showToast("☁️ Google Drive එකට Auto-Sync විය!");
+  } catch (err) {
+    console.error("Google Drive Sync Error:", err);
+  }
+}
+
+async function syncFromGoogleDrive() {
+  if (!googleDriveToken) return;
+
+  try {
+    const searchRes = await fetch("https://www.googleapis.com/drive/v3/files?q=name='Notes_Category_Data.json' and trashed=false", {
+      headers: { 'Authorization': `Bearer ${googleDriveToken}` }
+    });
+    const searchJson = await searchRes.json();
+
+    if (searchJson.files && searchJson.files.length > 0) {
+      const fileId = searchJson.files[0].id;
+      const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: { 'Authorization': `Bearer ${googleDriveToken}` }
+      });
+      const imported = await fileRes.json();
+
+      if (imported && imported.faculties && imported.timetable) {
+        state.faculties = imported.faculties;
+        state.timetable = imported.timetable;
+        saveState(false);
+        renderSidebar();
+        renderMainView();
+        showToast("☁️ Google Drive වෙතින් සටහන් Sync විය!");
+      }
+    }
+  } catch (err) {
+    console.error("Google Drive Fetch Error:", err);
+  }
+}
+
+function triggerManualCloudSync() {
+  syncToGoogleDrive();
+}
+
+function scheduleAutoCloudSync() {
+  if (!googleDriveToken) return;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    syncToGoogleDrive();
+  }, 3000);
 }

@@ -20,6 +20,9 @@
   <!-- HTML2PDF library for Direct 1-Click PDF Generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
+  <!-- Google Identity Services for Google Drive Sync -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- Mobile PWA App Support & Icons -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon.png">
@@ -60,6 +63,9 @@
         </button>
         <button id="quickAddBtn" class="glass-btn btn-primary" title="අලුත් අයිතමයක් එකතු කරන්න">
           <i class="fa-solid fa-plus"></i> <span class="btn-text">නව අයිතමය</span>
+        </button>
+        <button id="cloudSyncBtn" class="glass-btn btn-cloud-sync" onclick="openCloudSyncModal()" title="Google Drive Auto Cloud Sync">
+          <i class="fa-brands fa-google-drive" style="color:#4285f4;"></i> <span class="btn-text">Cloud Sync</span>
         </button>
         <button id="exportDataBtn" class="glass-btn" title="Backup ගන්න (Data Export)">
           <i class="fa-solid fa-download"></i>
@@ -174,6 +180,47 @@
       </div>
       <div class="reader-body" id="readerContentBody">
         <div class="markdown-rendered" id="readerMarkdownText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Drive Cloud Sync Modal -->
+  <div class="modal-overlay hidden" id="cloudSyncModal">
+    <div class="modal-card glass-panel" style="max-width:480px;">
+      <div class="modal-header">
+        <h2 style="font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+          <i class="fa-brands fa-google-drive" style="color:#4285F4;"></i> Google Drive Cloud Sync
+        </h2>
+        <button class="btn-icon" onclick="closeCloudSyncModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="gap:16px; padding:16px;">
+        <div class="cloud-status-card" id="cloudStatusCard">
+          <div class="status-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          <div class="status-info">
+            <h4 id="cloudUserEmail">Google සේවාවට සම්බන්ධ වී නැත</h4>
+            <p id="cloudSyncStatus">ඔබගේ Google Drive එක සමඟ Phone එක සහ PC එක Auto Sync කිරීමට Sign in වන්න.</p>
+          </div>
+        </div>
+
+        <div class="cloud-actions-group">
+          <button id="googleSignInBtn" class="google-auth-btn" onclick="handleGoogleDriveAuth()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" width="20">
+            <span>Sign in with Google Account</span>
+          </button>
+          
+          <div class="sync-controls hidden" id="syncControlsGroup">
+            <button class="glass-btn btn-primary" onclick="triggerManualCloudSync()" style="width:100%;">
+              <i class="fa-solid fa-rotate"></i> දැන්ම Cloud Sync කරන්න (Sync Now)
+            </button>
+            <button class="glass-btn danger" onclick="handleGoogleSignOut()" style="width:100%; margin-top:8px;">
+              <i class="fa-solid fa-right-from-bracket"></i> Sign Out (ඉවත් වන්න)
+            </button>
+          </div>
+        </div>
+
+        <div class="cloud-info-box">
+          <p><i class="fa-solid fa-shield-halved" style="color:#10b981;"></i> <strong>100% නොමිලේ &amp; ආරක්ෂිතයි:</strong> ඔබගේ Google Drive හි AppData කලාපය තුළ තනි Backup ගොනුවක් පමණක් පවතී. Drive එකේ ඉඩ පිරෙන්නේ නැත!</p>
+        </div>
       </div>
     </div>
   </div>
