@@ -648,7 +648,47 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
                   </div>
                 ` : ''}
 
-                <div class="markdown-rendered">${renderedMarkdown}</div>
+                <div class="note-sheet-container" id="sheetContainer_${mod.id}">
+                  <!-- Reading Mode View -->
+                  <div class="reading-view-sheet" id="readSheet_${mod.id}">
+                    <div class="sheet-top-bar">
+                      <span class="sheet-status-badge"><i class="fa-solid fa-file-word"></i> Word / Docs Sheet View</span>
+                      <button class="sheet-edit-btn" onclick="toggleInlineEdit('${facId}', '${yrId}', '${semId}', '${subId}', '${mod.id}', true)">
+                        <i class="fa-solid fa-pen-to-square"></i> ලිපිය වෙනස් කරන්න (Edit Sheet)
+                      </button>
+                    </div>
+                    <div class="markdown-rendered sheet-paper" id="paperRendered_${mod.id}">
+                      ${renderedMarkdown}
+                    </div>
+                  </div>
+
+                  <!-- In-Place Google Docs Editor -->
+                  <div class="inline-docs-editor hidden" id="editSheet_${mod.id}">
+                    <div class="editor-toolbar">
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'bold')" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'italic')" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'underline')" title="Underline"><i class="fa-solid fa-underline"></i></button>
+                      <div class="editor-divider"></div>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'formatBlock', '<h3>')" title="Heading"><i class="fa-solid fa-heading"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'insertUnorderedList')" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+                      <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'insertOrderedList')" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+                      <div class="editor-divider"></div>
+                      <button type="button" class="editor-btn" onclick="attachInlineFile('${mod.id}', 'image')" title="Photo Upload"><i class="fa-solid fa-image" style="color:#38bdf8;"></i> Photo</button>
+                      <button type="button" class="editor-btn" onclick="attachInlineFile('${mod.id}', 'pdf')" title="PDF Upload"><i class="fa-solid fa-file-pdf" style="color:#f472b6;"></i> PDF</button>
+                    </div>
+                    <div id="inlineEditorEditable_${mod.id}" class="editor-contenteditable sheet-paper-editable" contenteditable="true">
+                      ${renderedMarkdown}
+                    </div>
+                    <div class="sheet-bottom-actions">
+                      <button class="glass-btn btn-primary" onclick="saveInlineEdit('${facId}', '${yrId}', '${semId}', '${subId}', '${mod.id}')">
+                        <i class="fa-solid fa-floppy-disk"></i> තැන්පත් කරන්න (Save Changes)
+                      </button>
+                      <button class="glass-btn" onclick="toggleInlineEdit('${facId}', '${yrId}', '${semId}', '${subId}', '${mod.id}', false)">
+                        <i class="fa-solid fa-xmark"></i> අවලංගු කරන්න
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           `;
@@ -1548,6 +1588,102 @@ function togglePdfBookmark() {
   }
 
   showToast(`PDF Bookmark පිටු අංක ${parsedPage} ලෙස සුරක්ෂිත විය!`);
+}
+
+function toggleFullscreenDrawer() {
+  const drawer = document.getElementById("mediaDrawer");
+  const btn = document.getElementById("fullscreenDrawerBtn");
+  if (!drawer) return;
+
+  const isFullscreen = drawer.classList.toggle("fullscreen-mode");
+  if (btn) {
+    btn.innerHTML = isFullscreen 
+      ? '<i class="fa-solid fa-compress"></i> Exit Fullscreen' 
+      : '<i class="fa-solid fa-expand"></i> Fullscreen';
+  }
+  showToast(isFullscreen ? "සම්පූර්ණ තිරයෙන් බලන ආකාරය (Fullscreen) සක්‍රිය විය!" : "සාමාන්‍ය ආකාරය (Normal View) සක්‍රිය විය!");
+}
+
+function toggleInlineEdit(facId, yrId, semId, subId, modId, enableEdit) {
+  const readSheet = document.getElementById(`readSheet_${modId}`);
+  const editSheet = document.getElementById(`editSheet_${modId}`);
+
+  if (enableEdit) {
+    if (readSheet) readSheet.classList.add("hidden");
+    if (editSheet) editSheet.classList.remove("hidden");
+    const ed = document.getElementById(`inlineEditorEditable_${modId}`);
+    if (ed) {
+      ed.focus();
+      ed.addEventListener("paste", handleEditorPaste);
+    }
+  } else {
+    if (editSheet) editSheet.classList.add("hidden");
+    if (readSheet) readSheet.classList.remove("hidden");
+  }
+}
+
+function formatInlineEditor(modId, cmd, val = null) {
+  const ed = document.getElementById(`inlineEditorEditable_${modId}`);
+  if (ed) ed.focus();
+  document.execCommand(cmd, false, val);
+}
+
+function attachInlineFile(modId, type) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = type === 'image' ? 'image/*' : 'application/pdf';
+  fileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const base64Data = evt.target.result;
+      const fileName = escapeHTML(file.name);
+      
+      let tagHtml = '';
+      if (type === 'image') {
+        tagHtml = ` <span class="inline-attach-tag img-tag" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}')" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName}</span> `;
+      } else {
+        tagHtml = ` <span class="inline-attach-tag pdf-tag" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}')" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName}</span> `;
+      }
+
+      const ed = document.getElementById(`inlineEditorEditable_${modId}`);
+      if (ed) {
+        ed.focus();
+        document.execCommand('insertHTML', false, tagHtml);
+        showToast(type === 'image' ? "ඡායාරූපය එකතු විය!" : "PDF එක එකතු විය!");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  fileInput.click();
+}
+
+function saveInlineEdit(facId, yrId, semId, subId, modId) {
+  const ed = document.getElementById(`inlineEditorEditable_${modId}`);
+  if (!ed) return;
+
+  const htmlContent = ed.innerHTML;
+  const textContent = ed.innerText;
+
+  const fac = state.faculties.find(f => f.id === facId);
+  if (!fac) return;
+  const yr = fac.years.find(y => y.id === yrId);
+  if (!yr) return;
+  const sem = yr.semesters.find(s => s.id === semId);
+  if (!sem) return;
+  const sub = sem.subjects.find(s => s.id === subId);
+  if (!sub) return;
+  const mod = sub.modules.find(m => m.id === modId);
+  if (!mod) return;
+
+  mod.contentHtml = htmlContent;
+  mod.content = textContent;
+
+  saveState();
+  renderMainView();
+  showToast("සටහන සාර්ථකව සුරක්ෂිත විය!");
 }
 
 function toggleModuleModalFields(val) {
