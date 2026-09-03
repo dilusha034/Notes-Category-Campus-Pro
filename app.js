@@ -542,7 +542,7 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
         </div>
         <div class="subject-action-bar">
           <button class="glass-btn btn-primary" onclick="openModuleModal('${facId}', '${yrId}', '${semId}', '${subId}')">
-            <i class="fa-solid fa-plus"></i> නව අයිතමයක් (Syllabus / Note / Book)
+            <i class="fa-solid fa-plus"></i> <span class="btn-text">නව අයිතමය</span>
           </button>
           <button class="glass-btn" title="PDF ලෙස බාගත කරන්න" onclick="printOrExportPDF()">
             <i class="fa-solid fa-file-pdf"></i> PDF

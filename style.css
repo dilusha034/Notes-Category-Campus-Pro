@@ -658,15 +658,23 @@ body {
   padding-bottom: 16px;
   border-bottom: 1px solid var(--glass-border);
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.view-title-group {
+  flex: 1;
+  min-width: 200px;
 }
 
 .view-title-group h2 {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  word-break: break-word;
   background: linear-gradient(90deg, #fff 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -773,6 +781,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.subject-action-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .module-tabs {
@@ -781,6 +799,10 @@ body {
   border-bottom: 1px solid var(--glass-border);
   padding-bottom: 12px;
   overflow-x: auto;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab-btn {
