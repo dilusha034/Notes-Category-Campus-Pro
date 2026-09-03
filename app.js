@@ -688,6 +688,7 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
                       <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'hiliteColor', '#fef08a')" style="background:#fef08a; color:#000;" title="කහ පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
                       <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'hiliteColor', '#a7f3d0')" style="background:#a7f3d0; color:#000;" title="කොළ පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
                       <button type="button" class="editor-btn" onclick="formatInlineEditor('${mod.id}', 'hiliteColor', '#fbcfe8')" style="background:#fbcfe8; color:#000;" title="රෝස පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
+                      <button type="button" class="editor-btn" onclick="removeHighlight('inlineEditorEditable_${mod.id}')" title="Highlight රිමූව් කරන්න" style="border-color:#ef4444; color:#ef4444;"><i class="fa-solid fa-ban"></i> Clear</button>
 
                       <div class="editor-divider"></div>
 
@@ -783,6 +784,8 @@ function updateBookPage(facId, yrId, semId, subId, modId, delta) {
 
 let currentReaderModContext = null;
 
+let isFullscreenReaderEditing = false;
+
 // Distraction-Free Fullscreen Note Reader Modal
 function openFullscreenReader(modId) {
   let targetMod = null;
@@ -795,7 +798,7 @@ function openFullscreenReader(modId) {
           const found = sub.modules.find(m => m.id === modId);
           if (found) {
             targetMod = found;
-            targetContext = { facId: f.id, yrId: y.id, semId: s.id, subId: sub.id, modId: found.id };
+            targetContext = { facId: f.id, yrId: y.id, semId: s.id, subId: sub.id, modId: found.id, mod: found };
           }
         });
       });
@@ -804,6 +807,7 @@ function openFullscreenReader(modId) {
 
   if (!targetMod) return;
   currentReaderModContext = targetContext;
+  isFullscreenReaderEditing = false;
 
   const tagInfo = getModuleTagInfo(targetMod.type);
   const badge = document.getElementById("readerCategoryBadge");
@@ -813,19 +817,101 @@ function openFullscreenReader(modId) {
   document.getElementById("readerTitle").textContent = targetMod.title;
   
   const rendered = targetMod.contentHtml || (marked.parse ? marked.parse(targetMod.content || '') : targetMod.content);
-  document.getElementById("readerMarkdownText").innerHTML = rendered;
+  const textEl = document.getElementById("readerMarkdownText");
+  textEl.innerHTML = rendered;
+  textEl.style.display = "block";
+
+  const editorContainer = document.getElementById("readerEditorContainer");
+  if (editorContainer) editorContainer.style.display = "none";
+
+  const btnText = document.getElementById("readerEditBtnText");
+  if (btnText) btnText.textContent = "සංස්කරණය (Edit Note)";
 
   document.getElementById("fullscreenReaderModal").classList.remove("hidden");
 }
 
-function editNoteFromFullscreenReader() {
+function toggleFullscreenReaderEdit() {
   if (!currentReaderModContext) return;
-  const { facId, yrId, semId, subId, modId } = currentReaderModContext;
-  closeReaderModal();
-  selectSubject(facId, yrId, semId, subId);
-  setTimeout(() => {
-    toggleInlineEdit(facId, yrId, semId, subId, modId, true);
-  }, 150);
+
+  const textEl = document.getElementById("readerMarkdownText");
+  const editorContainer = document.getElementById("readerEditorContainer");
+  const editableEl = document.getElementById("readerEditableContent");
+  const toolbarEl = document.getElementById("readerEditorToolbar");
+  const btnText = document.getElementById("readerEditBtnText");
+
+  if (!isFullscreenReaderEditing) {
+    isFullscreenReaderEditing = true;
+    textEl.style.display = "none";
+    editorContainer.style.display = "flex";
+    if (btnText) btnText.textContent = "💾 සුරකින්න (Save Note)";
+
+    const mod = currentReaderModContext.mod;
+    const currentHtml = mod.contentHtml || (marked.parse ? marked.parse(mod.content || '') : mod.content);
+    editableEl.innerHTML = currentHtml;
+
+    toolbarEl.innerHTML = `
+      <div class="editor-toolbar" style="border-radius:8px;">
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('bold')" title="Bold"><i class="fa-solid fa-bold"></i></button>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('italic')" title="Italic"><i class="fa-solid fa-italic"></i></button>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('underline')" title="Underline"><i class="fa-solid fa-underline"></i></button>
+        <div class="editor-divider"></div>
+        <div class="editor-btn" title="අකුරු පාට" style="padding:2px 6px;">
+          <i class="fa-solid fa-palette" style="color:#818cf8;"></i>
+          <input type="color" value="#818cf8" onchange="formatFullscreenEditor('foreColor', this.value)" style="width:20px; height:20px; border:none; background:transparent; cursor:pointer;">
+        </div>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('hiliteColor', '#fef08a')" style="background:#fef08a; color:#000;" title="කහ Highlight"><i class="fa-solid fa-highlighter"></i></button>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('hiliteColor', '#a7f3d0')" style="background:#a7f3d0; color:#000;" title="කොළ Highlight"><i class="fa-solid fa-highlighter"></i></button>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('hiliteColor', '#fbcfe8')" style="background:#fbcfe8; color:#000;" title="රෝස Highlight"><i class="fa-solid fa-highlighter"></i></button>
+        <button type="button" class="editor-btn" onclick="removeHighlight('readerEditableContent')" title="🚫 Highlight ඉවත් කරන්න" style="border-color:#ef4444; color:#ef4444;"><i class="fa-solid fa-ban"></i> Highlight Clear</button>
+        <div class="editor-divider"></div>
+        <select onchange="formatFullscreenEditor('fontSize', this.value)" class="editor-select" title="Font Size">
+          <option value="3">Normal</option>
+          <option value="4">Large</option>
+          <option value="5">XL</option>
+        </select>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('formatBlock', '<h3>')" title="Heading"><i class="fa-solid fa-heading"></i></button>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('insertUnorderedList')" title="Bullet List"><i class="fa-solid fa-list-ul"></i></button>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('insertOrderedList')" title="Numbered List"><i class="fa-solid fa-list-ol"></i></button>
+        <button type="button" class="editor-btn" onclick="formatFullscreenEditor('removeFormat')" title="Clear Format"><i class="fa-solid fa-eraser"></i></button>
+      </div>
+    `;
+
+    editableEl.focus();
+    editableEl.addEventListener("paste", handleEditorPaste);
+    showToast("✏️ Fullscreen Editor සක්‍රිය විය!");
+  } else {
+    const newHtml = editableEl.innerHTML;
+    const newText = editableEl.innerText;
+    
+    const mod = currentReaderModContext.mod;
+    mod.contentHtml = newHtml;
+    mod.content = newText;
+
+    saveState();
+    renderMainView();
+
+    textEl.innerHTML = newHtml;
+    textEl.style.display = "block";
+    editorContainer.style.display = "none";
+    isFullscreenReaderEditing = false;
+    if (btnText) btnText.textContent = "සංස්කරණය (Edit Note)";
+
+    showToast("💾 සටහන Fullscreen මාදිලියේදීම සාර්ථකව සුරක්ෂිත විය!");
+  }
+}
+
+function formatFullscreenEditor(cmd, val = null) {
+  const ed = document.getElementById("readerEditableContent");
+  if (ed) ed.focus();
+  document.execCommand(cmd, false, val);
+}
+
+function removeHighlight(editableId = null) {
+  const ed = editableId ? document.getElementById(editableId) : document.activeElement;
+  if (ed) ed.focus();
+  document.execCommand('hiliteColor', false, 'transparent');
+  document.execCommand('backColor', false, 'transparent');
+  showToast("🚫 Highlight රිමූව් (Clear) විය!");
 }
 
 function closeReaderModal() {
@@ -1463,6 +1549,7 @@ function openModuleModal(facId, yrId, semId, subId, modId = null) {
         <button type="button" class="editor-btn" onclick="formatEditor('hiliteColor', '#fef08a')" style="background:#fef08a; color:#000;" title="කහ පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
         <button type="button" class="editor-btn" onclick="formatEditor('hiliteColor', '#a7f3d0')" style="background:#a7f3d0; color:#000;" title="කොළ පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
         <button type="button" class="editor-btn" onclick="formatEditor('hiliteColor', '#fbcfe8')" style="background:#fbcfe8; color:#000;" title="රෝස පාටින් Highlight කරන්න"><i class="fa-solid fa-highlighter"></i></button>
+        <button type="button" class="editor-btn" onclick="removeHighlight('editorContentEditable')" title="Highlight රිමූව් කරන්න" style="border-color:#ef4444; color:#ef4444;"><i class="fa-solid fa-ban"></i> Clear</button>
 
         <div class="editor-divider"></div>
 
