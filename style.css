@@ -272,6 +272,36 @@ body {
   text-transform: uppercase;
 }
 
+.btn-apk-download {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #10b981 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.btn-apk-download:hover {
+  background: rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+.btn-exe-download {
+  background: rgba(129, 140, 248, 0.15) !important;
+  border-color: rgba(129, 140, 248, 0.4) !important;
+  color: #818cf8 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.btn-exe-download:hover {
+  background: rgba(129, 140, 248, 0.3) !important;
+  box-shadow: 0 0 15px rgba(129, 140, 248, 0.4) !important;
+  transform: translateY(-1px);
+}
+
 .search-bar-wrapper {
   position: relative;
   flex: 1;
