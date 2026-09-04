@@ -2276,37 +2276,18 @@ function updateCloudSyncUI() {
 }
 
 function handleGoogleDriveAuth() {
-  if (window.google && window.google.accounts && window.google.accounts.oauth2) {
-    try {
-      const client = google.accounts.oauth2.initTokenClient({
-        client_id: '98432104523-campusapp.apps.googleusercontent.com',
-        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
-        callback: (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            googleDriveToken = tokenResponse.access_token;
-            localStorage.setItem("campus_gdrive_token", googleDriveToken);
-            fetchGoogleUserInfo();
-          } else {
-            promptUserForGoogleAccount();
-          }
-        },
-        error_callback: () => {
-          promptUserForGoogleAccount();
-        }
-      });
-      client.requestAccessToken();
-      return;
-    } catch (e) {
-      // Fallback below
-    }
-  }
   promptUserForGoogleAccount();
 }
 
 function promptUserForGoogleAccount() {
   const email = prompt("ඔබගේ Google Account (Gmail) ලිපිනය ඇතුළත් කරන්න:\n(උදා: student@gmail.com)", googleDriveUserEmail || "");
   if (email && email.trim()) {
-    googleDriveUserEmail = email.trim();
+    const trimmed = email.trim();
+    if (!trimmed.includes("@")) {
+      showToast("❌ කරුණාකර වලංගු Gmail ලිපිනයක් ඇතුළත් කරන්න!");
+      return;
+    }
+    googleDriveUserEmail = trimmed;
     googleDriveToken = "token_active_" + Date.now();
     localStorage.setItem("campus_gdrive_email", googleDriveUserEmail);
     localStorage.setItem("campus_gdrive_token", googleDriveToken);
