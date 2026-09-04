@@ -562,6 +562,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: calc(100vh - 210px);
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+  padding-bottom: 50px;
 }
 
 .tree-node {
@@ -2507,5 +2514,11 @@ textarea.form-control {
   .neon-btn-content {
     padding: 6px 12px;
     font-size: 0.78rem;
+  }
+  .sidebar.mobile-open .faculties-tree-container {
+    max-height: calc(100dvh - 160px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 90px !important;
   }
 }
