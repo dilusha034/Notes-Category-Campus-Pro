@@ -198,6 +198,9 @@ function loadState() {
   } else {
     useInitialData();
   }
+  if (state.faculties && state.faculties.length > 0) {
+    state.expandedNodes.add(state.faculties[0].id);
+  }
 }
 
 function useInitialData() {
@@ -240,9 +243,12 @@ function bindEvents() {
     openFacultyModal();
   });
 
-  document.getElementById("quickAddBtn").addEventListener("click", () => {
-    openQuickAddModal();
-  });
+  const quickAddBtn = document.getElementById("quickAddBtn");
+  if (quickAddBtn) {
+    quickAddBtn.addEventListener("click", () => {
+      openQuickAddModal();
+    });
+  }
 
   const searchInput = document.getElementById("globalSearch");
   const clearBtn = document.getElementById("clearSearch");
@@ -264,11 +270,20 @@ function bindEvents() {
     renderMainView();
   });
 
-  document.getElementById("exportDataBtn").addEventListener("click", exportData);
-  document.getElementById("importDataBtn").addEventListener("click", () => {
-    document.getElementById("importFileInput").click();
+  // Global click to close dropdowns
+  document.addEventListener("click", (e) => {
+    const backupWrapper = e.target.closest(".backup-dropdown-wrapper");
+    if (!backupWrapper) {
+      closeBackupDropdown();
+    }
   });
-  document.getElementById("importFileInput").addEventListener("change", importData);
+
+  const expBtn = document.getElementById("exportDataBtn");
+  if (expBtn) expBtn.addEventListener("click", exportData);
+  const impBtn = document.getElementById("importDataBtn");
+  if (impBtn) impBtn.addEventListener("click", () => document.getElementById("importFileInput").click());
+  const impInput = document.getElementById("importFileInput");
+  if (impInput) impInput.addEventListener("change", importData);
 
   document.getElementById("closeModalBtn").addEventListener("click", closeModal);
   document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
@@ -315,6 +330,19 @@ function bindEvents() {
   initTimetableNotifications();
 }
 
+function toggleBackupDropdown(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById("backupDropdownMenu");
+  if (menu) menu.classList.toggle("hidden");
+}
+
+function closeBackupDropdown() {
+  const menu = document.getElementById("backupDropdownMenu");
+  if (menu && !menu.classList.contains("hidden")) {
+    menu.classList.add("hidden");
+  }
+}
+
 function closeMobileSidebar() {
   const mainSidebar = document.getElementById("mainSidebar");
   const sidebarBackdrop = document.getElementById("sidebarBackdrop");
@@ -344,6 +372,16 @@ function toggleNodeExpand(nodeId, e) {
     state.expandedNodes.delete(nodeId);
   } else {
     state.expandedNodes.add(nodeId);
+  }
+  renderSidebar();
+}
+
+function toggleAllFacultiesExpand() {
+  const allFacultiesExpanded = state.faculties.length > 0 && state.faculties.every(f => state.expandedNodes.has(f.id));
+  if (allFacultiesExpanded) {
+    state.expandedNodes.clear();
+  } else {
+    state.faculties.forEach(f => state.expandedNodes.add(f.id));
   }
   renderSidebar();
 }
@@ -394,14 +432,14 @@ function renderSidebar() {
               <div class="tree-node ${isSemExpanded ? 'expanded' : ''}">
                 <div class="tree-node-header" onclick="toggleNodeExpand('${sem.id}', event)">
                   <div class="tree-title-group">
+                    <i class="fa-solid fa-chevron-right tree-chevron"></i>
                     <i class="fa-solid fa-layer-group" style="font-size:0.75rem; color:#38bdf8;"></i>
                     <span class="tree-title">${escapeHTML(sem.name)}</span>
                   </div>
-                  <div class="tree-controls">
+                  <div class="tree-controls" onclick="event.stopPropagation()">
                     <button class="btn-add-mini" title="විෂයක් එකතු කරන්න" onclick="event.stopPropagation(); openSubjectModal('${fac.id}', '${yr.id}', '${sem.id}')"><i class="fa-solid fa-plus"></i></button>
                     <button class="btn-icon" title="සංස්කරණය" onclick="event.stopPropagation(); openSemesterModal('${fac.id}', '${yr.id}', '${sem.id}')"><i class="fa-solid fa-pen"></i></button>
                     <button class="btn-icon danger" title="මකන්න" onclick="event.stopPropagation(); deleteSemester('${fac.id}', '${yr.id}', '${sem.id}')"><i class="fa-solid fa-trash"></i></button>
-                    <i class="fa-solid fa-chevron-right tree-chevron"></i>
                   </div>
                 </div>
                 <div class="tree-children">${subjectsHTML}</div>
@@ -416,14 +454,14 @@ function renderSidebar() {
           <div class="tree-node ${isYrExpanded ? 'expanded' : ''}">
             <div class="tree-node-header" onclick="toggleNodeExpand('${yr.id}', event)">
               <div class="tree-title-group">
+                <i class="fa-solid fa-chevron-right tree-chevron"></i>
                 <i class="fa-solid fa-calendar-days" style="font-size:0.78rem; color:#f472b6;"></i>
                 <span class="tree-title">${escapeHTML(yr.name)}</span>
               </div>
-              <div class="tree-controls">
+              <div class="tree-controls" onclick="event.stopPropagation()">
                 <button class="btn-add-mini" title="සමාසිකයක් එකතු කරන්න" onclick="event.stopPropagation(); openSemesterModal('${fac.id}', '${yr.id}')"><i class="fa-solid fa-plus"></i></button>
                 <button class="btn-icon" title="සංස්කරණය" onclick="event.stopPropagation(); openYearModal('${fac.id}', '${yr.id}')"><i class="fa-solid fa-pen"></i></button>
                 <button class="btn-icon danger" title="මකන්න" onclick="event.stopPropagation(); deleteYear('${fac.id}', '${yr.id}')"><i class="fa-solid fa-trash"></i></button>
-                <i class="fa-solid fa-chevron-right tree-chevron"></i>
               </div>
             </div>
             <div class="tree-children">${semestersHTML}</div>
@@ -437,16 +475,16 @@ function renderSidebar() {
     facCard.innerHTML = `
       <div class="tree-node-header" onclick="toggleNodeExpand('${fac.id}', event)">
         <div class="tree-title-group">
+          <i class="fa-solid fa-chevron-right tree-chevron"></i>
           <div class="faculty-badge-icon" style="background:${fac.color || '#818cf8'}; width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.75rem;">
             <i class="fa-solid fa-graduation-cap"></i>
           </div>
           <span class="tree-title" style="font-weight:700;">${escapeHTML(fac.name)}</span>
         </div>
-        <div class="tree-controls">
+        <div class="tree-controls" onclick="event.stopPropagation()">
           <button class="btn-add-mini" title="වසරක් එකතු කරන්න" onclick="event.stopPropagation(); openYearModal('${fac.id}')"><i class="fa-solid fa-plus"></i></button>
           <button class="btn-icon" title="පීඨයේ නම සංස්කරණය" onclick="event.stopPropagation(); openFacultyModal('${fac.id}')"><i class="fa-solid fa-pen"></i></button>
           <button class="btn-icon danger" title="පීඨය මකන්න" onclick="event.stopPropagation(); deleteFaculty('${fac.id}')"><i class="fa-solid fa-trash"></i></button>
-          <i class="fa-solid fa-chevron-right tree-chevron"></i>
         </div>
       </div>
       <div class="tree-children">${yearsHTML}</div>
@@ -613,22 +651,22 @@ function renderSubjectView(container, facId, yrId, semId, subId) {
           return `
             <div class="accordion-card ${isOpen ? 'open' : ''}" id="acc_${mod.id}">
               <div class="accordion-header" onclick="toggleAccordion('${mod.id}')">
-                <div class="accordion-title-group">
+                <div class="accordion-header-top">
                   <span class="category-tag ${tagInfo.class}">${tagInfo.label}</span>
-                  <span class="accordion-title">${escapeHTML(mod.title)}</span>
+                  <div class="accordion-controls">
+                    <button class="btn-icon" title="සම්පූර්ණ තිරයේ තබා කියවන්න (Fullscreen Reader)" onclick="event.stopPropagation(); openFullscreenReader('${mod.id}')">
+                      <i class="fa-solid fa-expand"></i>
+                    </button>
+                    <button class="btn-icon" title="සංස්කරණය" onclick="event.stopPropagation(); openModuleModal('${facId}', '${yrId}', '${semId}', '${subId}', '${mod.id}')">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="btn-icon danger" title="මකන්න" onclick="event.stopPropagation(); deleteModule('${facId}', '${yrId}', '${semId}', '${subId}', '${mod.id}')">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                  </div>
                 </div>
-                <div class="accordion-controls">
-                  <button class="btn-icon" title="සම්පූර්ණ තිරයේ තබා කියවන්න (Fullscreen Reader)" onclick="event.stopPropagation(); openFullscreenReader('${mod.id}')">
-                    <i class="fa-solid fa-expand"></i>
-                  </button>
-                  <button class="btn-icon" title="සංස්කරණය" onclick="event.stopPropagation(); openModuleModal('${facId}', '${yrId}', '${semId}', '${subId}', '${mod.id}')">
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-                  <button class="btn-icon danger" title="මකන්න" onclick="event.stopPropagation(); deleteModule('${facId}', '${yrId}', '${semId}', '${subId}', '${mod.id}')">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                  <i class="fa-solid fa-chevron-down arrow-icon"></i>
-                </div>
+                <div class="accordion-title">${escapeHTML(mod.title)}</div>
               </div>
               <div class="accordion-body">
                 ${mod.type === 'book' ? `

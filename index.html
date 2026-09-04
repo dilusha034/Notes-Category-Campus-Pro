@@ -61,18 +61,24 @@
         <button id="enableNotifyBtn" class="glass-btn" title="කාලසටහන් Notifications (Reminders) සක්‍රිය කරන්න">
           <i class="fa-solid fa-bell"></i> <span class="btn-text">Alerts</span>
         </button>
-        <button id="quickAddBtn" class="glass-btn btn-primary" title="අලුත් අයිතමයක් එකතු කරන්න">
-          <i class="fa-solid fa-plus"></i> <span class="btn-text">නව අයිතමය</span>
-        </button>
         <button id="cloudSyncBtn" class="glass-btn btn-cloud-sync" onclick="openCloudSyncModal()" title="Google Drive Auto Cloud Sync">
           <i class="fa-brands fa-google-drive" style="color:#4285f4;"></i> <span class="btn-text">Cloud Sync</span>
         </button>
-        <button id="exportDataBtn" class="glass-btn" title="Backup ගන්න (Data Export)">
-          <i class="fa-solid fa-download"></i>
-        </button>
-        <button id="importDataBtn" class="glass-btn" title="Backup ඇතුලත් කරන්න (Data Import)">
-          <i class="fa-solid fa-upload"></i>
-        </button>
+        
+        <!-- Combined Backup Dropdown -->
+        <div class="backup-dropdown-wrapper" style="position:relative;">
+          <button id="backupDropdownBtn" class="glass-btn" onclick="toggleBackupDropdown(event)" title="Backup & Restore (Export / Import)">
+            <i class="fa-solid fa-database" style="color:#a7f3d0;"></i> <span class="btn-text">Backup</span> <i class="fa-solid fa-chevron-down" style="font-size:0.68rem; margin-left:2px;"></i>
+          </button>
+          <div id="backupDropdownMenu" class="backup-dropdown-menu hidden">
+            <button onclick="exportData(); closeBackupDropdown();" class="backup-menu-item">
+              <i class="fa-solid fa-download" style="color:#34d399;"></i> <span>Data Export (Backup ගන්න)</span>
+            </button>
+            <button onclick="document.getElementById('importFileInput').click(); closeBackupDropdown();" class="backup-menu-item">
+              <i class="fa-solid fa-upload" style="color:#38bdf8;"></i> <span>Data Import (Backup ඇතුලත් කරන්න)</span>
+            </button>
+          </div>
+        </div>
         <input type="file" id="importFileInput" accept=".json" style="display:none;">
       </div>
     </div>
@@ -105,9 +111,14 @@
       <!-- Faculties Header -->
       <div class="section-header">
         <span class="section-title"><i class="fa-solid fa-university"></i> පීඨ (Faculties)</span>
-        <button class="btn-add-mini" id="addFacultyBtn" title="අලුත් පීඨයක් එකතු කරන්න">
-          <i class="fa-solid fa-plus"></i>
-        </button>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="btn-add-mini" id="toggleAllTreeBtn" title="සියලු පීඨ අකුළන්න / දිගහරින්න" onclick="toggleAllFacultiesExpand()">
+            <i class="fa-solid fa-folder-tree"></i>
+          </button>
+          <button class="btn-add-mini" id="addFacultyBtn" title="අලුත් පීඨයක් එකතු කරන්න">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Faculties list -->
@@ -122,10 +133,14 @@
         <span class="section-title"><i class="fa-solid fa-cloud-arrow-down"></i> APPS DOWNLOAD</span>
         <div class="sidebar-download-buttons">
           <a href="https://github.com/dilusha034/Notes-Category-Campus-Pro/raw/main/Notes-Category-Campus-Pro.apk" download class="sidebar-neon-btn sidebar-btn-apk" title="Android Mobile App (.apk) Direct Download">
-            <i class="fa-brands fa-android"></i> <span>Mobile App (.apk)</span>
+            <div class="sidebar-btn-inner">
+              <i class="fa-brands fa-android" style="font-size:1.1rem;"></i> <span>Mobile App (.apk)</span>
+            </div>
           </a>
           <a href="https://github.com/dilusha034/Notes-Category-Campus-Pro/raw/main/dist/Notes%20Category%20Campus%20Pro%20Setup%205.6.0.exe" download class="sidebar-neon-btn sidebar-btn-exe" title="Windows PC App (.exe) Direct Download">
-            <i class="fa-brands fa-windows"></i> <span>Windows PC (.exe)</span>
+            <div class="sidebar-btn-inner">
+              <i class="fa-brands fa-windows" style="font-size:1.1rem;"></i> <span>Windows PC (.exe)</span>
+            </div>
           </a>
         </div>
       </div>

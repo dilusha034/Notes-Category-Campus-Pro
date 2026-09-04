@@ -370,6 +370,51 @@ body {
   backdrop-filter: blur(10px);
 }
 
+.backup-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.backup-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 250px;
+  background: rgba(18, 24, 38, 0.96);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.backup-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition-fast);
+}
+
+.backup-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #38bdf8;
+}
+
 .glass-btn:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.25);
@@ -473,6 +518,7 @@ body {
   height: 1px;
   background: var(--glass-border);
   margin: 4px 0;
+  flex-shrink: 0;
 }
 
 .nav-item {
@@ -522,6 +568,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 4px 6px;
+  flex-shrink: 0;
 }
 
 .section-title {
@@ -533,6 +580,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .btn-add-mini {
@@ -561,14 +609,20 @@ body {
 .faculties-tree-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .tree-node {
+  position: relative;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
-  background: rgba(15, 23, 42, 0.4);
+  background: rgba(15, 23, 42, 0.45);
   transition: var(--transition-fast);
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tree-node.expanded {
@@ -576,15 +630,17 @@ body {
 }
 
 .tree-node-header {
-  padding: 8px 10px;
+  padding: 10px 12px;
+  min-height: 46px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
   transition: var(--transition-fast);
   user-select: none;
   border-radius: var(--radius-sm);
+  box-sizing: border-box;
 }
 
 .tree-node-header:hover {
@@ -611,9 +667,10 @@ body {
 .tree-controls {
   display: flex;
   align-items: center;
-  gap: 3px;
-  opacity: 0.85;
+  gap: 6px;
+  opacity: 0.95;
   flex-shrink: 0;
+  margin-left: 8px;
 }
 
 .tree-controls:hover {
@@ -621,10 +678,11 @@ body {
 }
 
 .tree-chevron {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   transition: transform var(--transition-fast);
-  margin-left: 2px;
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 
 .tree-node.expanded > .tree-node-header .tree-chevron {
@@ -896,18 +954,20 @@ body {
 .accordion-header {
   padding: 14px 18px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
   justify-content: space-between;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.02);
   user-select: none;
 }
 
-.accordion-title-group {
+.accordion-header-top {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
+  justify-content: space-between;
+  width: 100%;
+
 }
 
 .category-tag {
@@ -931,6 +991,9 @@ body {
   font-size: 1rem;
   font-weight: 700;
   color: var(--text-main);
+  line-height: 1.55;
+  width: 100%;
+  word-break: break-word;
 }
 
 .accordion-controls {
@@ -2297,11 +2360,35 @@ textarea.form-control {
 
 /* Mobile Typography & Element Scale Optimizations */
 @media (max-width: 868px) {
+  .header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    padding-bottom: 2px !important;
+  }
+  .backup-dropdown-menu {
+    position: fixed !important;
+    top: 58px !important;
+    right: 10px !important;
+    left: auto !important;
+    width: 250px !important;
+    max-width: calc(100vw - 20px) !important;
+    z-index: 999999 !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85) !important;
+  }
+  .header-actions .glass-btn {
+    padding: 6px 10px !important;
+    font-size: 0.8rem !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
   .tree-title {
-    font-size: 0.78rem !important;
+    font-size: 0.82rem !important;
   }
   .tree-node-header {
-    padding: 6px 8px !important;
+    padding: 8px 10px !important;
   }
   .glowing-title {
     font-size: 1.05rem !important;
@@ -2313,24 +2400,30 @@ textarea.form-control {
     padding: 6px 12px !important;
     font-size: 0.78rem !important;
   }
-  .accordion-title {
-    font-size: 0.84rem !important;
-    line-height: 1.35 !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-  }
   .accordion-header {
-    padding: 8px 10px !important;
+    padding: 10px 12px !important;
     gap: 8px !important;
+    align-items: flex-start !important;
   }
   .accordion-title-group {
+    flex-direction: column !important;
+    align-items: flex-start !important;
     gap: 6px !important;
-    flex: 1;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .accordion-title {
+    font-size: 0.92rem !important;
+    line-height: 1.6 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    margin-top: 2px !important;
   }
   .category-tag {
     font-size: 0.68rem !important;
-    padding: 2px 6px !important;
+    padding: 3px 8px !important;
     white-space: nowrap !important;
+    align-self: flex-start !important;
   }
   .sheet-paper {
     padding: 12px 14px !important;
@@ -2486,60 +2579,95 @@ textarea.form-control {
   }
 }
 
-@media (max-width: 768px) {
-/* Sidebar Download Buttons Section */
+/* Sidebar Download Buttons Section with Neon Rotating Gradient Borders */
+@property --sidebar-neon-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotateSidebarNeon {
+  0% {
+    --sidebar-neon-angle: 0deg;
+  }
+  100% {
+    --sidebar-neon-angle: 360deg;
+  }
+}
+
 .sidebar-download-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 6px;
   padding-top: 4px;
-  padding-bottom: 20px;
+  padding-bottom: 25px;
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .sidebar-download-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .sidebar-neon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-btn-apk {
+  background: conic-gradient(from var(--sidebar-neon-angle), #10b981, #34d399, #059669, #a7f3d0, #10b981);
+  animation: rotateSidebarNeon 2.8s linear infinite;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);
+}
+
+.sidebar-btn-exe {
+  background: conic-gradient(from var(--sidebar-neon-angle), #6366f1, #818cf8, #c084fc, #f472b6, #6366f1);
+  animation: rotateSidebarNeon 2.8s linear infinite;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.35);
+}
+
+.sidebar-neon-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.sidebar-btn-apk:hover {
+  box-shadow: 0 0 22px rgba(16, 185, 129, 0.65);
+}
+
+.sidebar-btn-exe:hover {
+  box-shadow: 0 0 22px rgba(129, 140, 248, 0.65);
+}
+
+.sidebar-btn-inner {
+  width: 100%;
+  background: rgba(11, 15, 25, 0.94);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-size: 0.85rem;
   font-weight: 700;
+  font-size: 0.85rem;
   letter-spacing: 0.3px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
 }
 
-.sidebar-btn-apk {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.35) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.5);
+.sidebar-btn-apk .sidebar-btn-inner {
   color: #34d399;
 }
 
-.sidebar-btn-apk:hover {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(5, 150, 105, 0.55) 100%);
-  border-color: #34d399;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-  transform: translateY(-2px);
-}
-
-.sidebar-btn-exe {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(79, 70, 229, 0.35) 100%);
-  border: 1px solid rgba(129, 140, 248, 0.5);
-  color: #a5b4fc;
-}
-
-.sidebar-btn-exe:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.35) 0%, rgba(79, 70, 229, 0.55) 100%);
-  border-color: #a5b4fc;
-  box-shadow: 0 0 20px rgba(129, 140, 248, 0.5);
-  transform: translateY(-2px);
+.sidebar-btn-exe .sidebar-btn-inner {
+  color: #c084fc;
 }
