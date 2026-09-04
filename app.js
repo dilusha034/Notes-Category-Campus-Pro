@@ -846,8 +846,8 @@ function toggleFullscreenReaderEdit() {
     if (btnText) btnText.textContent = "💾 සුරකින්න (Save Note)";
 
     const mod = currentReaderModContext.mod;
-    const currentHtml = mod.contentHtml || (marked.parse ? marked.parse(mod.content || '') : mod.content);
-    editableEl.innerHTML = currentHtml;
+    const rawHtml = mod.contentHtml || (marked.parse ? marked.parse(mod.content || '') : mod.content);
+    editableEl.innerHTML = prepareEditorContent(rawHtml);
 
     toolbarEl.innerHTML = `
       <div class="editor-toolbar" style="border-radius:8px;">
@@ -1572,7 +1572,7 @@ function openModuleModal(facId, yrId, semId, subId, modId = null) {
         <button type="button" class="editor-btn" onclick="attachFileToEditor('image')" title="Photo Upload (ඡායාරූපයක් එක් කරන්න)"><i class="fa-solid fa-image" style="color:#38bdf8;"></i> Photo</button>
         <button type="button" class="editor-btn" onclick="attachFileToEditor('pdf')" title="PDF Upload (PDF ගොනුවක් එක් කරන්න)"><i class="fa-solid fa-file-pdf" style="color:#f472b6;"></i> PDF</button>
       </div>
-      <div id="editorContentEditable" class="editor-contenteditable" contenteditable="true" placeholder="ඔබගේ සටහන් හෝ AI මාදිලියකින් Copy කළ ලිපිය මෙතැනට Paste කරන්න...">${existingMod ? (existingMod.contentHtml || (marked.parse ? marked.parse(existingMod.content || '') : existingMod.content)) : ''}</div>
+      <div id="editorContentEditable" class="editor-contenteditable" contenteditable="true" placeholder="ඔබගේ සටහන් හෝ AI මාදිලියකින් Copy කළ ලිපිය මෙතැනට Paste කරන්න...">${existingMod ? prepareEditorContent(existingMod.contentHtml || (marked.parse ? marked.parse(existingMod.content || '') : existingMod.content)) : ''}</div>
       <p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
         💡 ChatGPT / Gemini / AI වලින් Copy කළ ලිපිය මෙතැනට Paste කළ විට ස්වයංක්‍රීයව Bold, Colors, Headers සකස් වේ.
       </p>
@@ -1657,6 +1657,38 @@ function handleEditorPaste(e) {
   showToast("AI කේත සහ සටහන් ස්වයංක්‍රීයව සකස් විය!");
 }
 
+function prepareEditorContent(html) {
+  if (!html) return '';
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+
+  temp.querySelectorAll('.inline-attach-tag').forEach(tag => {
+    tag.setAttribute('contenteditable', 'false');
+    if (!tag.querySelector('.remove-attachment-btn')) {
+      const removeBtn = document.createElement('span');
+      removeBtn.className = 'remove-attachment-btn';
+      removeBtn.setAttribute('onclick', 'deleteAttachmentTag(event, this)');
+      removeBtn.setAttribute('title', 'මෙම ගොනුව ඉවත් කරන්න');
+      removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      tag.appendChild(removeBtn);
+    }
+  });
+
+  return temp.innerHTML;
+}
+
+function deleteAttachmentTag(event, btn) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const tag = btn ? btn.closest('.inline-attach-tag') : null;
+  if (tag) {
+    tag.remove();
+    showToast("🗑️ Attached ගොනුව ඉවත් විය (Deleted)!");
+  }
+}
+
 // Local File Upload & Inline Attachment Tag Insertion
 function attachFileToEditor(type) {
   const fileInput = document.createElement('input');
@@ -1673,9 +1705,9 @@ function attachFileToEditor(type) {
       
       let tagHtml = '';
       if (type === 'image') {
-        tagHtml = ` <span class="inline-attach-tag img-tag" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}')" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName}</span> `;
+        tagHtml = `&nbsp;<span class="inline-attach-tag img-tag" contenteditable="false" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}')" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම ඡායාරූපය ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
       } else {
-        tagHtml = ` <span class="inline-attach-tag pdf-tag" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}')" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName}</span> `;
+        tagHtml = `&nbsp;<span class="inline-attach-tag pdf-tag" contenteditable="false" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}')" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම PDF එක ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
       }
 
       const ed = document.getElementById("editorContentEditable");
@@ -1797,6 +1829,7 @@ function toggleInlineEdit(facId, yrId, semId, subId, modId, enableEdit) {
     if (editSheet) editSheet.classList.remove("hidden");
     const ed = document.getElementById(`inlineEditorEditable_${modId}`);
     if (ed) {
+      ed.innerHTML = prepareEditorContent(ed.innerHTML);
       ed.focus();
       ed.addEventListener("paste", handleEditorPaste);
     }
@@ -1827,9 +1860,9 @@ function attachInlineFile(modId, type) {
       
       let tagHtml = '';
       if (type === 'image') {
-        tagHtml = ` <span class="inline-attach-tag img-tag" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}')" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName}</span> `;
+        tagHtml = `&nbsp;<span class="inline-attach-tag img-tag" contenteditable="false" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}')" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම ඡායාරූපය ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
       } else {
-        tagHtml = ` <span class="inline-attach-tag pdf-tag" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}')" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName}</span> `;
+        tagHtml = `&nbsp;<span class="inline-attach-tag pdf-tag" contenteditable="false" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}')" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම PDF එක ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
       }
 
       const ed = document.getElementById(`inlineEditorEditable_${modId}`);

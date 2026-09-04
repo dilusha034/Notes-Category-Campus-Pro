@@ -1918,6 +1918,28 @@ textarea.form-control {
   border: 1px solid rgba(6, 182, 212, 0.4);
 }
 
+.remove-attachment-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  font-size: 0.7rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.remove-attachment-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: scale(1.2);
+}
+
 /* Floating Edit Action Button (Google Docs Style Pencil) */
 .fab-edit-btn {
   position: fixed;
