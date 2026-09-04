@@ -1,6 +1,6 @@
 {
   "name": "notes-category-campus-pro",
-  "version": "3.2.0",
+  "version": "5.6.0",
   "description": "Ultimate Glassmorphism Academic Notes & Timetable Manager for Campus Students (Windows 11 Compatible)",
   "main": "main.js",
   "scripts": {
@@ -26,6 +26,16 @@
   "build": {
     "appId": "com.campusstudent.notescategory",
     "productName": "Notes Category Campus Pro",
+    "compression": "maximum",
+    "files": [
+      "index.html",
+      "app.js",
+      "style.css",
+      "main.js",
+      "icon.png",
+      "manifest.json",
+      "sw.js"
+    ],
     "win": {
       "target": "nsis",
       "icon": "icon.png"

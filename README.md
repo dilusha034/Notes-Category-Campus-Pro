@@ -35,7 +35,7 @@
 | :--- | :--- | :--- |
 | **📱 Android App (.apk)** | [**📥 Download v5.6 APK**](https://github.com/dilusha034/Notes-Category-Campus-Pro/raw/main/Notes-Category-Campus-Pro.apk) | Direct APK for Android Phones & Tablets |
 | **🌐 Web Application** | [**🚀 Launch Web App**](https://dilusha034.github.io/Notes-Category-Campus-Pro/) | Works in any modern Web Browser instantly |
-| **💻 Windows App (.exe)** | [**📥 Download Setup (.exe)**](https://github.com/dilusha034/Notes-Category-Campus-Pro/raw/main/dist/Notes%20Category%20Campus%20Pro%20Setup%203.2.0.exe) | Desktop Software for Windows 10/11 PCs |
+| **💻 Windows App (.exe)** | [**📥 Download Setup (.exe)**](https://github.com/dilusha034/Notes-Category-Campus-Pro/raw/main/dist/Notes%20Category%20Campus%20Pro%20Setup%205.6.0.exe) | Desktop Software for Windows 10/11 PCs |
 
 ---
 
