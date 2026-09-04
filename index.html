@@ -129,9 +129,10 @@
   <div class="media-drawer-overlay hidden" id="mediaDrawerOverlay"></div>
   <aside class="media-drawer glass-panel hidden" id="mediaDrawer">
     <div class="media-drawer-header">
-      <div class="media-drawer-title">
+      <div class="media-drawer-title" style="display:flex; align-items:center; gap:8px;">
         <i class="fa-solid fa-file-pdf" id="mediaDrawerIcon" style="color:#ec4899;"></i>
         <span id="mediaDrawerTitle" style="font-weight:600; font-size:0.95rem;">ගොනු පෙරදසුන</span>
+        <button class="btn-icon" onclick="renameMediaTitle()" title="ගොනුවේ නම වෙනස් කරන්න (Rename Title)" style="padding:2px 6px; font-size:0.85rem;"><i class="fa-solid fa-pen-to-square" style="color:var(--primary-glow);"></i></button>
       </div>
       <div class="media-drawer-actions">
         <button class="glass-btn btn-primary btn-sm" id="bookmarkBtn" onclick="togglePdfBookmark()" title="මෙම පිටුව Bookmark කරන්න">

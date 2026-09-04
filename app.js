@@ -1705,9 +1705,9 @@ function attachFileToEditor(type) {
       
       let tagHtml = '';
       if (type === 'image') {
-        tagHtml = `&nbsp;<span class="inline-attach-tag img-tag" contenteditable="false" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}')" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම ඡායාරූපය ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
+        tagHtml = `&nbsp;<span class="inline-attach-tag img-tag" contenteditable="false" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}', null, this)" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම ඡායාරූපය ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
       } else {
-        tagHtml = `&nbsp;<span class="inline-attach-tag pdf-tag" contenteditable="false" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}')" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම PDF එක ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
+        tagHtml = `&nbsp;<span class="inline-attach-tag pdf-tag" contenteditable="false" data-page="1" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}', null, this)" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම PDF එක ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
       }
 
       const ed = document.getElementById("editorContentEditable");
@@ -1723,10 +1723,44 @@ function attachFileToEditor(type) {
 }
 
 // Global Media Drawer State
-let currentActiveMedia = { type: null, url: null, title: null, modId: null, pageNum: 1 };
+let currentActiveMedia = { type: null, url: null, title: null, modId: null, pageNum: 1, tagElement: null };
 
-function openMediaDrawer(type, url, title, modId = null, pageNum = 1) {
-  currentActiveMedia = { type, url, title, modId, pageNum: pageNum || 1 };
+function getPdfViewerUrl(url, pageNum = 1) {
+  if (!url) return '';
+  let finalUrl = url;
+  if (url.startsWith('data:application/pdf')) {
+    try {
+      const arr = url.split(',');
+      const mimeMatch = arr[0].match(/:(.*?);/);
+      const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], { type: mime });
+      finalUrl = URL.createObjectURL(blob);
+    } catch(e) {
+      console.warn("Blob conversion error:", e);
+    }
+  }
+  const cleanUrl = finalUrl.split('#')[0];
+  return `${cleanUrl}#page=${pageNum}`;
+}
+
+function openMediaDrawer(type, url, title, modId = null, elementOrPage = 1) {
+  let pageNum = 1;
+  let tagElement = null;
+
+  if (typeof elementOrPage === 'number') {
+    pageNum = elementOrPage;
+  } else if (elementOrPage && elementOrPage.nodeType) {
+    tagElement = elementOrPage;
+    pageNum = parseInt(tagElement.getAttribute('data-page')) || 1;
+  }
+
+  currentActiveMedia = { type, url, title, modId, pageNum, tagElement };
   
   const drawer = document.getElementById("mediaDrawer");
   const overlay = document.getElementById("mediaDrawerOverlay");
@@ -1743,17 +1777,18 @@ function openMediaDrawer(type, url, title, modId = null, pageNum = 1) {
 
   if (type === 'pdf') {
     bookmarkBtn.style.display = 'inline-flex';
+    const pdfSrc = getPdfViewerUrl(url, pageNum);
     drawerBody.innerHTML = `
       <div class="pdf-bookmark-banner" id="pdfBookmarkBanner">
-        <span><i class="fa-solid fa-bookmark"></i> Bookmark : <strong>පිටු අංකය ${pageNum || 1}</strong></span>
-        <span style="font-size:0.75rem; opacity:0.8;">ඊළඟ වතාවේ මෙතැනින්ම කියවිය හැක</span>
+        <span><i class="fa-solid fa-bookmark"></i> Bookmark : <strong>පිටු අංකය ${pageNum}</strong></span>
+        <button class="glass-btn btn-sm" onclick="togglePdfBookmark()" style="margin-left:auto; padding:2px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i> පිටුව වෙනස් කරන්න</button>
       </div>
-      <iframe src="${url}#page=${pageNum || 1}" class="pdf-preview-iframe" title="${escapeHTML(title)}"></iframe>
+      <iframe src="${pdfSrc}" class="pdf-preview-iframe" title="${escapeHTML(title || 'PDF')}"></iframe>
     `;
   } else {
     bookmarkBtn.style.display = 'none';
     drawerBody.innerHTML = `
-      <img src="${url}" class="img-preview-full" alt="${escapeHTML(title)}">
+      <img src="${url}" class="img-preview-full" alt="${escapeHTML(title || 'Image')}">
     `;
   }
 
@@ -1775,35 +1810,43 @@ function togglePdfBookmark() {
   const parsedPage = parseInt(newPage) || 1;
   currentActiveMedia.pageNum = parsedPage;
 
+  if (currentActiveMedia.tagElement) {
+    currentActiveMedia.tagElement.setAttribute('data-page', parsedPage);
+  }
+
   const banner = document.getElementById("pdfBookmarkBanner");
   if (banner) {
     banner.innerHTML = `<span><i class="fa-solid fa-bookmark"></i> Bookmark : <strong>පිටු අංකය ${parsedPage}</strong></span> <span style="font-size:0.75rem; opacity:0.8;">සුරක්ෂිත විය!</span>`;
   }
 
-  // Reload PDF viewer iframe with page parameter to immediately jump to target page
   const iframe = document.querySelector(".pdf-preview-iframe");
   if (iframe && currentActiveMedia.url) {
-    const cleanUrl = currentActiveMedia.url.split('#')[0];
-    iframe.src = `${cleanUrl}#page=${parsedPage}`;
+    iframe.src = getPdfViewerUrl(currentActiveMedia.url, parsedPage);
   }
 
-  if (currentActiveMedia.modId) {
-    state.faculties.forEach(f => {
-      f.years.forEach(y => {
-        y.semesters.forEach(s => {
-          s.subjects.forEach(sub => {
-            const m = sub.modules.find(mod => mod.id === currentActiveMedia.modId);
-            if (m) {
-              m.bookmarkedPage = parsedPage;
-            }
-          });
-        });
-      });
-    });
-    saveState();
+  saveState();
+  showToast(`📌 PDF Bookmark පිටු අංක ${parsedPage} වෙතින් සුරක්ෂිත විය!`);
+}
+
+function renameMediaTitle() {
+  const currentTitle = currentActiveMedia.title || '';
+  const newName = prompt("ගොනුවේ නව මාතෘකාව (Title) ඇතුළත් කරන්න:", currentTitle);
+  if (!newName || !newName.trim() || newName.trim() === currentTitle) return;
+
+  const cleanName = escapeHTML(newName.trim());
+  currentActiveMedia.title = cleanName;
+
+  const drawerTitle = document.getElementById("mediaDrawerTitle");
+  if (drawerTitle) drawerTitle.textContent = cleanName;
+
+  if (currentActiveMedia.tagElement) {
+    const iconClass = currentActiveMedia.type === 'pdf' ? 'fa-file-pdf' : 'fa-image';
+    const pageAttr = currentActiveMedia.tagElement.getAttribute('data-page') || 1;
+    currentActiveMedia.tagElement.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම ගොනුව ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span>`;
   }
 
-  showToast(`PDF Bookmark පිටු අංක ${parsedPage} වෙතින් සුරක්ෂිත විය!`);
+  saveState();
+  showToast("✏️ ගොනුවේ නම සාර්ථකව වෙනස් විය!");
 }
 
 function toggleFullscreenDrawer() {
@@ -1860,9 +1903,9 @@ function attachInlineFile(modId, type) {
       
       let tagHtml = '';
       if (type === 'image') {
-        tagHtml = `&nbsp;<span class="inline-attach-tag img-tag" contenteditable="false" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}')" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම ඡායාරූපය ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
+        tagHtml = `&nbsp;<span class="inline-attach-tag img-tag" contenteditable="false" onclick="openMediaDrawer('image', '${base64Data}', '${fileName}', null, this)" title="ඡායාරූපය බලන්න"><i class="fa-solid fa-image"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම ඡායාරූපය ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
       } else {
-        tagHtml = `&nbsp;<span class="inline-attach-tag pdf-tag" contenteditable="false" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}')" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම PDF එක ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
+        tagHtml = `&nbsp;<span class="inline-attach-tag pdf-tag" contenteditable="false" data-page="1" onclick="openMediaDrawer('pdf', '${base64Data}', '${fileName}', null, this)" title="PDF එක බලන්න"><i class="fa-solid fa-file-pdf"></i> ${fileName} <span class="remove-attachment-btn" onclick="deleteAttachmentTag(event, this)" title="මෙම PDF එක ඉවත් කරන්න"><i class="fa-solid fa-xmark"></i></span></span>&nbsp;`;
       }
 
       const ed = document.getElementById(`inlineEditorEditable_${modId}`);
