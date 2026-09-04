@@ -376,43 +376,50 @@ body {
 }
 
 .backup-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 250px;
-  background: rgba(18, 24, 38, 0.96);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  padding: 6px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  width: 260px !important;
+  background: rgba(15, 23, 42, 0.98) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  padding: 6px !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.85) !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.backup-dropdown-menu.hidden {
+  display: none !important;
 }
 
 .backup-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 14px;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
-  transition: var(--transition-fast);
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  padding: 10px 14px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition: background 0.2s ease !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
 }
 
 .backup-menu-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #38bdf8;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #38bdf8 !important;
 }
 
 .glass-btn:hover {
@@ -956,7 +963,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  justify-content: space-between;
+  align-items: stretch !important;
+  width: 100% !important;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.02);
   user-select: none;
@@ -2665,9 +2673,11 @@ textarea.form-control {
 }
 
 .sidebar-btn-apk .sidebar-btn-inner {
-  color: #34d399;
+  color: #34d399 !important;
+  text-decoration: none !important;
 }
 
 .sidebar-btn-exe .sidebar-btn-inner {
-  color: #c084fc;
+  color: #c084fc !important;
+  text-decoration: none !important;
 }
