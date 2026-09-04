@@ -232,6 +232,7 @@ function bindEvents() {
     state.activeView = { type: "timetable", facultyId: null, yearId: null, semesterId: null, subjectId: null, moduleFilter: "all" };
     updateNavActiveState();
     renderMainView();
+    closeMobileSidebar();
   });
 
   document.getElementById("addFacultyBtn").addEventListener("click", (e) => {

@@ -442,6 +442,7 @@ body {
   overflow-y: auto;
   overscroll-behavior: contain;
   touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sidebar.mobile-open {
@@ -453,9 +454,6 @@ body {
   max-width: 86vw !important;
   height: 100vh !important;
   height: 100dvh !important;
-  height: 100% !important;
-  min-height: 100vh !important;
-  max-height: 100vh !important;
   margin: 0 !important;
   border-radius: 0 !important;
   z-index: 999999 !important;
@@ -463,6 +461,10 @@ body {
   display: flex !important;
   flex-direction: column !important;
   box-shadow: 20px 0 60px rgba(0, 0, 0, 0.95) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-bottom: 50px !important;
 }
 
 .sidebar-divider {
@@ -2365,4 +2367,150 @@ textarea.form-control {
     width: 100vw !important;
     max-width: 100vw !important;
   }
+}
+
+/* ==========================================================================
+   FUTURISTIC NEON ROTATING BORDER DOWNLOAD FOOTER CARDS
+   ========================================================================== */
+
+.app-download-footer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.footer-download-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  padding: 2px;
+  background: rgba(18, 26, 43, 0.7);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.footer-download-card:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+.footer-download-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    transparent,
+    transparent,
+    transparent,
+    #10b981
+  );
+  animation: rotateBorderGlow 4s linear infinite;
+  z-index: 1;
+}
+
+.exe-neon-card::before {
+  background: conic-gradient(
+    transparent,
+    transparent,
+    transparent,
+    #818cf8,
+    #ec4899
+  );
+}
+
+@keyframes rotateBorderGlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.download-card-content {
+  position: relative;
+  z-index: 2;
+  background: rgba(13, 19, 33, 0.95);
+  border-radius: calc(var(--radius-lg) - 2px);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+  backdrop-filter: blur(16px);
+}
+
+.card-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.android-icon-bg {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.windows-icon-bg {
+  background: rgba(129, 140, 248, 0.15);
+  color: #818cf8;
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  box-shadow: 0 0 20px rgba(129, 140, 248, 0.3);
+}
+
+.card-text h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 4px;
+}
+
+.card-text p {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.glow-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-top: auto;
+  cursor: pointer;
+}
+
+.glow-download-btn.btn-android {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+}
+
+.glow-download-btn.btn-android:hover {
+  box-shadow: 0 6px 25px rgba(16, 185, 129, 0.7);
+  transform: translateY(-2px);
+}
+
+.glow-download-btn.btn-windows {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+.glow-download-btn.btn-windows:hover {
+  box-shadow: 0 6px 25px rgba(139, 92, 246, 0.7);
+  transform: translateY(-2px);
 }
